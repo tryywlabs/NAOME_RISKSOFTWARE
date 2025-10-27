@@ -4,7 +4,6 @@ DESCRIPTION: Login page for the risk assessment software.
 FUNCTIONS: login_window, user_entry, login_verify
 '''
 
-
 from tkinter import *
 import ttkbootstrap as tkbs
 
@@ -73,12 +72,6 @@ def login_window():
   
   #Loop
   login.mainloop()
-    
-
-  if(login_verify(username_entry.get(), pw_entry.get())):
-    login.quit()
-    return True
-
 
 # TODO: Implement actual login verification with backend and DB
 def login_verify(username, password):
@@ -88,8 +81,11 @@ def login_verify(username, password):
   else:
     return False
 
-def login_attempt():
-  pass
+def login_attempt(login, username_entry, pw_entry):
+  #evaluate using login_verify function on button click
+  if login_verify(username_entry.get(), pw_entry.get()):
+    login.quit()
+    return True
 
 if __name__ == "__main__":
   login_window()

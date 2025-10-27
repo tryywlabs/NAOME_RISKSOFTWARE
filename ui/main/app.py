@@ -19,6 +19,7 @@ def main():
   root = tkbs.Window(themename=theme)
   root.title("Maritime Risk Assessment")
   root.geometry("1024x768")
+  root.eval('tk::PlaceWindow . center')
   # loginpage.login_window()
   root.mainloop()
 
