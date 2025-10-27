@@ -29,10 +29,6 @@ class TabBar(tk.Frame):
         self.inner = tk.Frame(self.canvas)
         self.inner_id = self.canvas.create_window((0,0), window=self.inner, anchor='nw')
 
-        # new tab button (unused for fixed tabs)
-        # self.new_tab_btn = tk.Button(self, text='+', width=3, command=self.add_new_tab)
-        # self.new_tab_btn.pack(side=RIGHT, padx=4)
-
         # scrolling bindings
         self.inner.bind('<Configure>', lambda e: self._on_inner_configure())
         self.canvas.bind('<Configure>', lambda e: self._on_canvas_configure())
@@ -64,8 +60,7 @@ class TabBar(tk.Frame):
         self.inner.grid_columnconfigure(index, weight=1)
 
         lbl = tk.Label(tab_frame, text=title, padx=4)
-        # make the label expand to fill its tab frame so the tab looks like a
-        # stretchable button
+        # make the label expand to fill its tab frame so the tab looks like a stretchable button
         lbl.pack(fill='both', expand=True)
 
         # clicking the tab
