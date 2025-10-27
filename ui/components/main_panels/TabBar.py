@@ -1,5 +1,5 @@
 import ttkbootstrap as tkbs
-from ttkbootstrap.constants import LEFT, RIGHT, X
+# from ttkbootstrap.constants import LEFT, RIGHT, X
 import tkinter as tk
 
 class TabBar(tk.Frame):
