@@ -1,5 +1,5 @@
 import ttkbootstrap as tkbs
-# from ttkbootstrap.constants import LEFT, RIGHT, X
+from ttkbootstrap.constants import LEFT, RIGHT, X
 import tkinter as tk
 
 class TabBar(tk.Frame):
@@ -9,21 +9,13 @@ class TabBar(tk.Frame):
         self.tabs = []
         self.active_tab = None
 
-        # Left/back button (optional)
-        self.left_btn = tk.Button(self, text='◀', width=2, command=self.scroll_left)
-
         # Canvas that holds the tab frames so we can scroll horizontally
         self.canvas = tk.Canvas(self, height=34, bd=0, highlightthickness=0)
-
-        # Right/forward button (optional)
-        self.right_btn = tk.Button(self, text='▶', width=2, command=self.scroll_right)
 
         # Layout using grid so the canvas (column 1) expands to fill available width.
         # This is more robust than pack for making the tab row span the full window.
         self.grid_columnconfigure(1, weight=1)
-        self.left_btn.grid(row=0, column=0, sticky='w', padx=(2,0), pady=2)
         self.canvas.grid(row=0, column=1, sticky='ew')
-        self.right_btn.grid(row=0, column=2, sticky='e', padx=(0,2), pady=2)
 
         # create an interior frame to put tab widgets inside the canvas
         self.inner = tk.Frame(self.canvas)

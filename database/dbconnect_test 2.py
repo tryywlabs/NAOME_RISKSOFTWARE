@@ -8,12 +8,11 @@ try:
 except:
   print("DB connection failed")
 
-cursor = connection.cursor()
+curr = connection.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS test (id SERIAL PRIMARY KEY, num integer, data VARCHAR);")
-cursor.execute("INSERT INTO test (num, data) VALUES (%s, %s);", (100, "abcdef"))
-cursor.execute("SELECT * FROM test;")
+curr.execute("CREATE TABLE IF NOT EXISTS test (id SERIAL PRIMARY KEY, num integer, data VARCHAR);")
+curr.execute("INSERT INTO test (num, data) VALUES (%s, %s);", (100, "abc'def"))
 
 connection.commit()
-cursor.close()
+curr.close()
 connection.close()
