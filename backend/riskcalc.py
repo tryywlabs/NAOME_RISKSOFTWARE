@@ -1,4 +1,6 @@
 # This is the boilerplate for backend operations for the application
+# All Functions are dummy placeholders
+# TODO: Implement actual logic when calculation algorithms are received
 
 def calculate_risk_factor(params):
     # Placeholder function for risk calculation logic
