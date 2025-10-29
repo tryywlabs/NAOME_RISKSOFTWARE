@@ -6,6 +6,18 @@ NOTE: Might use instead of the current TabBar + app.py structure.
 
 import tkinter as tk
 from tkinter import ttk
+import pathlib
+import sys
+
+try:
+    from ui.main.main_panels.calculate import CalculateFrame
+except ModuleNotFoundError:
+    # repo root is two levels up from ui/main/ (i.e. RISKSOFTWARE)
+    repo_root = pathlib.Path(__file__).resolve().parents[2]
+    sys.path.insert(0, str(repo_root))
+    from ui.main.main_panels.calculate import CalculateFrame
+
+# from main_panels.calculate import CalculateFrame
 
 def main():
   root = tk.Tk()
@@ -23,6 +35,12 @@ def main():
   frame1 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
   frame2 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
   frame3 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
+  frame4 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
+  frame5 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
+  frame6 = tk.Frame(tabs, width=400, height=200, bg='LightCyan3')
+  # Create the CalculateFrame as a child of the Notebook so it becomes a
+  # proper tab page. CalculateFrame requires a container argument.
+  calculateTab = CalculateFrame(tabs)
 
   label1 = tk.Label(frame1, text="This is Tab 1")
   label1.pack()
@@ -38,13 +56,15 @@ def main():
   label3 = tk.Label(frame3, text="This is Tab 3")
   label3.pack()
 
-  frame1.pack(fill='both', expand=True)
-  frame2.pack(fill='both', expand=True)
-  frame3.pack(fill='both', expand=True)
+  # Do not pack the tab pages — the Notebook will manage their geometry when
+  # they are added with `tabs.add(...)`.
 
+  tabs.add(calculateTab, text='Calculate')
   tabs.add(frame1, text='Tab 1')
   tabs.add(frame2, text='Tab 2')
   tabs.add(frame3, text='Tab 3')
+  tabs.add(frame4, text='Tab 4')
+  tabs.add(frame5, text='Tab 5')
 
   root.mainloop()
 

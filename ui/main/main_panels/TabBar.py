@@ -1,3 +1,8 @@
+# NOTE: DEPRECATED: Use roottab.py for the main program body
+# NOTE: DEPRECATED: Use roottab.py for the main program body
+# NOTE: DEPRECATED: Use roottab.py for the main program body
+
+
 import ttkbootstrap as tkbs
 from ttkbootstrap.constants import LEFT, RIGHT, X
 import tkinter as tk

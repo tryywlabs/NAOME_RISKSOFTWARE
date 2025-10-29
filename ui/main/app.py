@@ -2,6 +2,7 @@
 FILE: ui/main/app.py
 DESCRIPTION: Main loop of the interface application.
 AUTHOR: Yongwoo Hur
+NOTE: DEPRECATED; Use roottab.py for the main program body
 '''
 
 import os, sys
