@@ -1,4 +1,5 @@
 """4_entry_calc component
+NOTE: DEPRECATED: Use entry_grid_4.py instead.
 
 Provides EntryGridComponent: a 4x4 layout component intended for embedding in
 calculation panels. The layout is:

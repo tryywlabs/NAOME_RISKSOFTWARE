@@ -1,8 +1,18 @@
-"""Entry grid component (renamed to a valid module name).
+"""4_entry_calc component
 
-Contains EntryGridComponent which provides the 4x4 layout described by the
-project: display (col0, rowspan 4), entries with placeholders (col1),
-checkboxes (col2), and action button (col3, rowspan 4).
+Provides EntryGridComponent: a 4x4 layout component intended for embedding in
+calculation panels. The layout is:
+
+  - Col 0: display Label spanning 4 rows
+  - Col 1: four Entry widgets with placeholder text
+  - Col 2: four Checkbuttons to select each entry
+  - Col 3: an Action button spanning 4 rows
+
+The component is importable and can be instantiated as:
+  from ui.main.main_panels.templates.4_entry_calc import EntryGridComponent
+  comp = EntryGridComponent(parent)
+
+Running this file directly launches a small demo window.
 """
 
 import tkinter as tk
@@ -81,7 +91,7 @@ class EntryGridComponent(tk.Frame):
     def set_display(self, text):
         self.display.config(text=text)
 
-
+# ----------------- demo / test -----------------
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("EntryGridComponent Demo")
