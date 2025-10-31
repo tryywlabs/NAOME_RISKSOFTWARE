@@ -36,6 +36,7 @@ class CalculateFrame(tk.Frame):
         # Content area where multiple EntryGridComponents can be arranged in a grid
         self.content = ttk.Frame(self)
         self.content.grid(row=1, column=0, sticky='nsew', padx=12, pady=8)
+
         # make a 4x2 grid by default (you can change sizes as needed)
         self.content.columnconfigure(2, weight=1)
         for r in range(4):
@@ -45,7 +46,9 @@ class CalculateFrame(tk.Frame):
         for r in range(4):
             for c in range(1):
                 comp = EntryGridComponent(self.content,
-                                          placeholders=[f'R{r+1}C{c+1}-1', f'R{r+1}C{c+1}-2', f'R{r+1}C{c+1}-3', f'R{r+1}C{c+1}-4'],
+                                          #NOTE: Replace placeholders with meaningful defaults as needed
+                                          #placeholders=[f'R{r+1}C{c+1}-1', f'R{r+1}C{c+1}-2', f'R{r+1}C{c+1}-3', f'R{r+1}C{c+1}-4'],
+                                          placeholders=[f'Input 1', f'Input 2', f'Input 3', f'Input 4'],
                                           action_text='Apply')
                 comp.grid(row=r, column=c, sticky='nsew', padx=6, pady=6)
                 self.entry_grids.append(comp)
