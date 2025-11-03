@@ -106,9 +106,10 @@ main(): FUNCTION
 
 def main():
     if TB_AVAILABLE:
-        root = tb.Window(themename="cyborg")
-        style = tb.Style(theme="cyborg")
-        print("ttkbootstrap available — using theme:", "cyborg")
+        thistheme = "cyborg"
+        root = tb.Window(themename=thistheme)
+        style = tb.Style(theme=thistheme)
+        print("ttkbootstrap available — using theme:", thistheme)
     else:
         root = tk.Tk()
         root.title('Nested Notebook Demo')
