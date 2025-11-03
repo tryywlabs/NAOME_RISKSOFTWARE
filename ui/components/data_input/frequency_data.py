@@ -1,9 +1,29 @@
+"""
+FILE: frequency_data.py
+DESCRIPTION:
+    DATA INPUT -> Frequency Data (2nd tab)
+    Frequency Data UI component using ttkbootstrap.
+FUNCTIONS:
+    create_group_ui(root):
+        Render the frequency data page UI in the provided root window.
+        
+        INNER FUNCTIONS:
+            configure_scroll_region(event):
+                Configure the scroll region of the canvas.
+            configure_inner_scroll_region(event):
+                Configure the scroll region of the inner canvas.
+            set_fuel_phase(value):
+                Set the selected fuel phase in the menu.
+"""
+
+'''IMPORT STATEMENTS'''
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import ttk
 from tkinter import Canvas
 from tkinter import StringVar
 
+'''FUNCTION: create_group_ui(root)'''
 def create_group_ui(root):
     """Create the group UI in the provided root window."""
     style = tb.Style()
@@ -29,6 +49,9 @@ def create_group_ui(root):
 
     main_frame.bind("<Configure>", configure_scroll_region)
 
+    # Configure the column width for the grouping_frame
+    main_frame.grid_columnconfigure(0, weight=1, minsize=100)
+
     # Grouping Section
     grouping_frame = ttk.LabelFrame(main_frame, text="Grouping", padding=10)
     grouping_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
@@ -49,6 +72,33 @@ def create_group_ui(root):
     ttk.Entry(grouping_frame).grid(row=4, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Button(grouping_frame, text="Save", bootstyle=SUCCESS).grid(row=5, column=1, sticky=E, padx=5, pady=5)
+
+    # Add a scrollable inner box inside the grouping section
+    inner_group_frame = ttk.LabelFrame(grouping_frame, text="View of All Groups ", padding=10)
+    inner_group_frame.grid(row=0, column=2, rowspan=6, sticky="nsew", padx=10, pady=5)
+
+    # Create a canvas and scrollbar for horizontal scrolling
+    inner_canvas = Canvas(inner_group_frame)
+    h_scrollbar = ttk.Scrollbar(inner_group_frame, orient="horizontal", command=inner_canvas.xview)
+    inner_canvas.configure(xscrollcommand=h_scrollbar.set)
+
+    # Pack the canvas and scrollbar
+    inner_canvas.pack(side="top", fill="both", expand=True)
+    h_scrollbar.pack(side="bottom", fill="x")
+
+    # Create a frame inside the canvas
+    scrollable_frame = ttk.Frame(inner_canvas)
+    inner_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+    # Configure the canvas to scroll horizontally
+    def configure_inner_scroll_region(event):
+        inner_canvas.configure(scrollregion=inner_canvas.bbox("all"))
+
+    scrollable_frame.bind("<Configure>", configure_inner_scroll_region)
+
+    # Add placeholder content to the scrollable frame
+    for i in range(10):
+        ttk.Label(scrollable_frame, text=f"Item {i+1}").grid(row=0, column=i, padx=5, pady=5)
 
     # Operational Conditions
     operational_frame = ttk.LabelFrame(main_frame, text="Operational Conditions", padding=10)
