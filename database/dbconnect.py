@@ -12,11 +12,11 @@ import os
 load_dotenv()
 
 # Fetch variables
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+HOST = os.getenv("DB_HOST")
+PORT = os.getenv("DB_PORT")
+DBNAME = os.getenv("DB_NAME")
 
 # Connect to the database
 try:
@@ -28,12 +28,13 @@ try:
         dbname=DBNAME
     )
     print("Connection successful!")
+    print(PORT)
     
     # Create a cursor to execute SQL queries
     cursor = connection.cursor()
     
     # Example query
-    cursor.execute("SELECT NOW();")
+    cursor.execute("SELECT * FROM \"1_Centrifugal_Compressors\";")
     result = cursor.fetchone()
     print("Current Time:", result)
 

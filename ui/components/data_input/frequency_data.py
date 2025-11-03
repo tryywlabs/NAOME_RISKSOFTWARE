@@ -1,0 +1,148 @@
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+from tkinter import ttk
+from tkinter import Canvas
+from tkinter import StringVar
+
+def create_group_ui(root):
+    """Create the group UI in the provided root window."""
+    style = tb.Style()
+
+    # Create a canvas and scrollbar for scrolling
+    canvas = Canvas(root)
+    scrollbar = ttk.Scrollbar(root, orient="vertical", command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Pack the canvas and scrollbar
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Create a frame inside the canvas
+    main_frame = ttk.Frame(canvas, padding=10)
+
+    # Add the frame to the canvas
+    canvas.create_window((0, 0), window=main_frame, anchor="nw")
+
+    # Configure the canvas to scroll
+    def configure_scroll_region(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    main_frame.bind("<Configure>", configure_scroll_region)
+
+    # Grouping Section
+    grouping_frame = ttk.LabelFrame(main_frame, text="Grouping", padding=10)
+    grouping_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+    ttk.Label(grouping_frame, text="Operation hours (/ year):").grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    ttk.Entry(grouping_frame).grid(row=0, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(grouping_frame, text="Phase:").grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    ttk.Combobox(grouping_frame, values=["Liquid", "Gas"]).grid(row=1, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(grouping_frame, text="Working Press. (Bar):").grid(row=2, column=0, sticky=W, padx=5, pady=5)
+    ttk.Entry(grouping_frame).grid(row=2, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(grouping_frame, text="Working Temp. (K):").grid(row=3, column=0, sticky=W, padx=5, pady=5)
+    ttk.Entry(grouping_frame).grid(row=3, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(grouping_frame, text="System Size (mm):").grid(row=4, column=0, sticky=W, padx=5, pady=5)
+    ttk.Entry(grouping_frame).grid(row=4, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Button(grouping_frame, text="Save", bootstyle=SUCCESS).grid(row=5, column=1, sticky=E, padx=5, pady=5)
+
+    # Operational Conditions
+    operational_frame = ttk.LabelFrame(main_frame, text="Operational Conditions", padding=10)
+    operational_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+
+    ttk.Label(operational_frame, text="Fuel Phase:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    fuel_phase_var = StringVar(value="Select Fuel Phase")
+    fuel_phase_menu = ttk.Menubutton(operational_frame, textvariable=fuel_phase_var, width=15)
+    fuel_phase_menu.grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    fuel_phase_menu.menu = tb.Menu(fuel_phase_menu, tearoff=0)
+    fuel_phase_menu["menu"] = fuel_phase_menu.menu
+
+    def set_fuel_phase(value):
+        fuel_phase_var.set(value)
+
+    fuel_phase_menu.menu.add_command(label="Liquid", command=lambda: set_fuel_phase("Liquid"))
+    fuel_phase_menu.menu.add_command(label="Gas", command=lambda: set_fuel_phase("Gas"))
+
+    ttk.Label(operational_frame, text="Pressure (Bar):").grid(row=0, column=1, sticky=W, padx=5, pady=5)
+    ttk.Spinbox(operational_frame, from_=0, to=1000, increment=1).grid(row=1, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(operational_frame, text="Temperature (K):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
+    ttk.Spinbox(operational_frame, from_=270, to=310, increment=1).grid(row=1, column=2, sticky=W, padx=5, pady=5)
+
+    ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
+    ttk.Spinbox(operational_frame, from_=0, to=500, increment=0.1).grid(row=1, column=3, sticky=W, padx=5, pady=5)
+
+    ttk.Button(operational_frame, text="Confirm", bootstyle=SUCCESS).grid(row=1, column=4, sticky=E, padx=5, pady=5)
+
+    # Equipment List-Up
+
+    equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Head Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Head Exchanger', '8. Tube Side Head Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
+    
+    equipment_frame = ttk.LabelFrame(main_frame, text="Equipment List-Up", padding=10)
+    equipment_frame.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+
+    ttk.Label(equipment_frame, text="Name of Equipment:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    ttk.Combobox(equipment_frame, values=equipments).grid(row=0, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(equipment_frame, text="Size:").grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    ttk.Combobox(equipment_frame, values=[">=50mm", "<50mm"]).grid(row=1, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Label(equipment_frame, text="EA:").grid(row=2, column=0, sticky=W, padx=5, pady=5)
+    ttk.Entry(equipment_frame).grid(row=2, column=1, sticky=W, padx=5, pady=5)
+
+    ttk.Button(equipment_frame, text="Add", bootstyle=SUCCESS).grid(row=3, column=0, sticky=W, padx=5, pady=5)
+    ttk.Button(equipment_frame, text="Remove", bootstyle=DANGER).grid(row=3, column=1, sticky=W, padx=5, pady=5)
+    ttk.Button(equipment_frame, text="Confirm", bootstyle=SUCCESS).grid(row=3, column=2, sticky=W, padx=5, pady=5)
+
+    # Group List
+    group_list_frame = ttk.LabelFrame(main_frame, text="Group List", padding=10)
+    group_list_frame.grid(row=3, column=0, sticky="nsew", padx=10, pady=10)
+
+    columns = ("No.", "Equip. List", "Size", "EA")
+    group_table = ttk.Treeview(group_list_frame, columns=columns, show="headings")
+    for col in columns:
+        group_table.heading(col, text=col)
+        group_table.column(col, width=100)
+    group_table.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+    # Prevent scrolling the entire window when interacting with a Combobox
+    def disable_scroll(event):
+        canvas.unbind_all("<MouseWheel>")
+
+    def enable_scroll(event):
+        canvas.bind_all("<MouseWheel>", on_mouse_wheel)
+
+    # Bind focus events for all Combobox widgets explicitly
+    def bind_combobox_events(frame):
+        for child in frame.winfo_children():
+            if isinstance(child, ttk.Combobox):
+                child.bind("<Enter>", disable_scroll)
+                child.bind("<Leave>", enable_scroll)
+            elif isinstance(child, ttk.Frame) or isinstance(child, ttk.LabelFrame):
+                bind_combobox_events(child)  # Recursively bind events in nested frames
+
+    bind_combobox_events(main_frame)
+
+    # Bind mouse wheel scrolling to the canvas
+    # Adjust mouse wheel scrolling to handle both directions
+    def on_mouse_wheel(event):
+        direction = -1 if event.delta > 0 else 1
+        canvas.yview_scroll(direction, "units")
+
+    canvas.bind_all("<MouseWheel>", on_mouse_wheel)
+
+    # Allow clicking on empty space to clear focus
+    def clear_focus(event):
+        root.focus_set()
+
+    canvas.bind("<Button-1>", clear_focus)
+
+if __name__ == "__main__":
+    root = tb.Window(themename="pulse")
+    root.geometry("1100x760")
+    create_group_ui(root)
+    root.mainloop()

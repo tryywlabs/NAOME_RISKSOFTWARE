@@ -13,4 +13,4 @@ def main():
   nb.add(frame, text='Sample Tab')
 
 if __name__ == "__main__":
-  main().mainloop()stpgpga
+  main().mainloop()
