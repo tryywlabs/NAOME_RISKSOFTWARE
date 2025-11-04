@@ -2,24 +2,23 @@
 FILE: nested_notebook_demo.py
 
 DESCRIPTION:
-  Nested notebook demo using ttkbootstrap.
+    Nested notebook demo using ttkbootstrap.
 
-  Creates a top-level window with an outer Notebook (3 tabs) and an inner
-  Notebook inside the Data Input tab with 4 tabs. This file is intended as a
-  drop-in runnable demo and will fall back to standard ttk if ttkbootstrap is
-  not available.
+    Creates a top-level window with an outer Notebook (3 tabs) and an inner
+    Notebook inside the Data Input tab with 4 tabs. This file is intended as a
+    drop-in runnable demo and will fall back to standard ttk if ttkbootstrap is
+    not available.
 
 FUNCTIONS:
-  1. build(root, style=None):
-      Build the nested notebook UI into the provided `root` window. If
-      `style` is provided (ttkbootstrap Style), apply the theme to the UI.
-  2. main():
-      Create the main application window, set up ttkbootstrap if available,
-      and launch the nested notebook demo. 
+    1. build(root, style=None):
+        Build the nested notebook UI into the provided `root` window. If
+        `style` is provided (ttkbootstrap Style), apply the theme to the UI.
+    2. main():
+        Create the main application window, set up ttkbootstrap if available,
+        and launch the nested notebook demo.
 """
 
-'''IMPORT STATEMENTS
-'''
+'''IMPORT STATEMENTS'''
 
 # Debug block for ttkbootstrap availability check
 import ttkbootstrap as tb
@@ -40,8 +39,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/data_input')))
 from frequency_data import create_group_ui
 
-'''build(root, style=None): FUNCTION
-'''
+'''build(root, style=None): FUNCTION'''
 
 def build(root, style=None):
     '''Build UI into `root`. `style` should be created before calling this
@@ -100,19 +98,17 @@ def build(root, style=None):
 
     return root
 
-'''
-main(): FUNCTION
-'''
+'''main(): FUNCTION'''
 
 def main():
     if TB_AVAILABLE:
-        thistheme = "cyborg"
+        thistheme = "pulse"
         root = tb.Window(themename=thistheme)
         style = tb.Style(theme=thistheme)
         print("ttkbootstrap available — using theme:", thistheme)
     else:
         root = tk.Tk()
-        root.title('Nested Notebook Demo')
+        root.title('Main Page')
         style = ttk.Style(root)
         print("ttkbootstrap not available — using default ttk style")
 
