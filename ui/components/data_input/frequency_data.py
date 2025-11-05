@@ -19,6 +19,7 @@ FUNCTIONS:
 '''IMPORT STATEMENTS'''
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
+from ttkbootstrap.widgets.tableview import Tableview
 from tkinter import ttk
 from tkinter import Canvas
 from tkinter import StringVar
@@ -106,7 +107,7 @@ def create_group_ui(root):
 
     # Operational Conditions
     operational_frame = ttk.LabelFrame(main_frame, text="Operational Conditions", padding=10)
-    operational_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    operational_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=10)
 
     ttk.Label(operational_frame, text="Fuel Phase:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
     fuel_phase_var = StringVar(value="Select Fuel Phase")
@@ -133,7 +134,6 @@ def create_group_ui(root):
     ttk.Button(operational_frame, text="Confirm", bootstyle=SUCCESS).grid(row=1, column=4, sticky=E, padx=5, pady=5)
 
     # Equipment List-Up
-
     equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Head Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Head Exchanger', '8. Tube Side Head Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
     
     equipment_frame = ttk.LabelFrame(main_frame, text="Equipment List-Up", padding=10)
@@ -180,33 +180,70 @@ def create_group_ui(root):
     # NOTE: PLACEHOLDER FOR MAX GROUP.
     # NOTE: In production, this value should be dynamically fetched from the middleware or database.
     max_group_no = 100
+    # spinbox for group selection to view specifics
     for i in range(3):
         spinbox = ttk.Spinbox(group_list_frame, from_=1, to=max_group_no, increment=1, width=10)
         spinbox.grid(row=i + 1, column=0, sticky="ew", padx=5, pady=5)
 
-    # Add the second table section to the right
-    specifics_table = ttk.Treeview(group_list_frame, columns=("Item No.", "Equip. List", "Size", "EA"), show="headings")
-    specifics_table.heading("Item No.", text="Item No.")
-    specifics_table.heading("Equip. List", text="Equip. List")
-    specifics_table.heading("Size", text="Size")
-    specifics_table.heading("EA", text="EA")
+    # # Add the second table section to the right
+    # specifics_table = ttk.Treeview(group_list_frame, columns=("Item No.", "Equip. List", "Size", "EA"), show="headings")
+    # specifics_table.heading("Item No.", text="Item No.")
+    # specifics_table.heading("Equip. List", text="Equip. List")
+    # specifics_table.heading("Size", text="Size")
+    # specifics_table.heading("EA", text="EA")
 
-    specifics_table.column("Item No.", width=100, anchor="center")
-    specifics_table.column("Equip. List", width=150, anchor="center")
-    specifics_table.column("Size", width=100, anchor="center")
-    specifics_table.column("EA", width=100, anchor="center")
+    # specifics_table.column("Item No.", width=100, anchor="center")
+    # specifics_table.column("Equip. List", width=150, anchor="center")
+    # specifics_table.column("Size", width=100, anchor="center")
+    # specifics_table.column("EA", width=100, anchor="center")
 
-    specifics_table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)
+    # specifics_table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)
 
-    # Embed the spinbox inside the 0th column of the Treeview in the second table
-    for i in range(3):
-        item_id = specifics_table.insert("", "end", values=("", "Equip. List", "Size", "EA"))
-        bbox = specifics_table.bbox(item_id, column="Item No.")
-        if bbox:  # Ensure the bounding box is valid
-            spinbox = ttk.Spinbox(group_list_frame, from_=0, to=100, increment=1, width=5)
-            spinbox.place(x=bbox[0] + specifics_table.winfo_rootx(),
-                          y=bbox[1] + specifics_table.winfo_rooty(),
-                          width=bbox[2], height=bbox[3])
+    # # Embed the spinbox inside the 0th column of the Treeview in the second table
+    # for i in range(3):
+    #     item_id = specifics_table.insert("", "end", values=("", "Equip. List", "Size", "EA"))
+    #     bbox = specifics_table.bbox(item_id, column="Item No.")
+    #     if bbox:  # Ensure the bounding box is valid
+    #         spinbox = ttk.Spinbox(group_list_frame, from_=0, to=100, increment=1, width=5)
+    #         spinbox.place(x=bbox[0] + specifics_table.winfo_rootx(), y=bbox[1] + specifics_table.winfo_rooty(), width=bbox[2], height=bbox[3])
+
+    # Using Tableview for better functionality
+    coldata = [
+        {"text": "No.", "width": 50, "anchor": "center"},
+        {"text": "Equip. List", "width": 200, "anchor": "center"},
+        {"text": "Size", "width": 100, "anchor": "center"},
+        {"text": "EA", "width": 50, "anchor": "center"},
+    ]
+
+    # NOTE: Placeholder data for the rows
+    # TODO: Replace by linking with the actual group data stored in memory or db
+    # (memory more likely unless user saves the current group data as CSV or to db)
+    # Would need to think about what storage mechanisms should be implemented (either one or both)
+    rowdata = [
+        (1, 'Centrifugal Compressor', '≥100mm', 5),
+        (2, 'Reciprocating Compressor', '≥50mm', 3),
+        (3, 'Filter', '≥25mm', 10),
+        (4, 'Flange', '≥12.5mm', 20),
+        (5, 'Fin Fan Head Exchanger', '≥150mm', 2),
+        (6, 'Plate Heat Exchanger', '≥100mm', 4),
+        (7, 'Shell Side Head Exchanger', '≥250mm', 1),
+        (8, 'Tube Side Head Exchanger', '≥250mm', 1),
+        (9, 'Pig Trap', '≥100mm', 2),
+        (10, 'Process Pipe', '≥50mm', 15),
+    ]
+
+    group_list_frame.grid_columnconfigure(1, weight=1)
+
+    table = Tableview(
+        master=group_list_frame,
+        coldata=coldata,
+        rowdata=rowdata,
+        paginated=True,
+        searchable=True,
+        bootstyle="primary",
+    )
+
+    table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)
 
     # Prevent scrolling the entire window when interacting with a Combobox
     def disable_scroll(event):
