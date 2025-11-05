@@ -1,5 +1,6 @@
 """
 For root tab in ttkbootstrap styled version
+NOTE: DEPRECATED; Use main.py for the main program body
 """
 
 import ttkbootstrap as ttkb

@@ -1,7 +1,7 @@
 '''
 FILE: roottab.py
 DESCRIPTION: Sample code to create a tabbed interface using tkinter's Notebook widget. Direct integration might actually be better.
-NOTE: Might use instead of the current TabBar + app.py structure.
+NOTE: DEPRECATED; Use main.py for the main program body
 '''
 
 import tkinter as tk

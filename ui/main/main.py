@@ -102,7 +102,7 @@ def build(root, style=None):
 
 def main():
     if TB_AVAILABLE:
-        thistheme = "pulse"
+        thistheme = "cyborg"
         root = tb.Window(themename=thistheme)
         style = tb.Style(theme=thistheme)
         print("ttkbootstrap available — using theme:", thistheme)

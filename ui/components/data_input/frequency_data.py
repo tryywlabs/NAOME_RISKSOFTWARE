@@ -23,6 +23,7 @@ from ttkbootstrap.widgets.tableview import Tableview
 from tkinter import ttk
 from tkinter import Canvas
 from tkinter import StringVar
+from tkinter.font import Font
 
 '''FUNCTION: create_group_ui(root)'''
 def create_group_ui(root):
@@ -52,15 +53,21 @@ def create_group_ui(root):
     # Configure the column width for the grouping_frame
     main_frame.grid_columnconfigure(0, weight=1, minsize=100)
 
+    # Create bold font for LabelFrame labels
+    bold_font = Font(family="Helvetica", size=10, weight="bold")
+
     # Grouping Section
     grouping_frame = ttk.LabelFrame(main_frame, text="Grouping", padding=10)
     grouping_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    # Apply bold font to the label
+    grouping_label = ttk.Label(grouping_frame.winfo_toplevel(), text="Grouping", font=bold_font)
+    grouping_frame.configure(labelwidget=grouping_label)
 
     ttk.Label(grouping_frame, text="Operation hours (/ year):").grid(row=1, column=0, sticky=W, padx=5, pady=5)
     ttk.Spinbox(grouping_frame, from_=0, to=10000, increment=1).grid(row=1, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Label(grouping_frame, text="Phase:").grid(row=2, column=0, sticky=W, padx=5, pady=5)
-    ttk.Combobox(grouping_frame, values=["Liquid", "Gas"]).grid(row=2, column=1, sticky=W, padx=5, pady=5)
+    ttk.Combobox(grouping_frame, values=["Liquid", "Gas"], state="readonly").grid(row=2, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Label(grouping_frame, text="Working Press. (Bar):").grid(row=3, column=0, sticky=W, padx=5, pady=5)
     ttk.Spinbox(grouping_frame, from_=0, to=10000, increment=1).grid(row=3, column=1, sticky=W, padx=5, pady=5)
@@ -73,12 +80,16 @@ def create_group_ui(root):
 
     group_save_frame = ttk.LabelFrame(grouping_frame, text="Save Group Results", padding=10)
     group_save_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+    save_label = ttk.Label(group_save_frame.winfo_toplevel(), text="Save Group Results", font=bold_font)
+    group_save_frame.configure(labelwidget=save_label)
 
-    ttk.Button(group_save_frame, text="Save", bootstyle=SUCCESS).grid(row=0, column=1, sticky=E, padx=5, pady=5)
+    ttk.Button(group_save_frame, text="Save", bootstyle=SUCCESS).grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
 
     # Add a scrollable inner box inside the grouping section
     inner_group_frame = ttk.LabelFrame(grouping_frame, text="View of All Groups ", padding=10)
     inner_group_frame.grid(row=0, column=2, columnspan=2, rowspan=6, sticky="nsew", padx=10, pady=5)
+    view_label = ttk.Label(inner_group_frame.winfo_toplevel(), text="View of All Groups ", font=bold_font)
+    inner_group_frame.configure(labelwidget=view_label)
 
     # Create a canvas and scrollbar for horizontal scrolling
     inner_canvas = Canvas(inner_group_frame)
@@ -105,9 +116,19 @@ def create_group_ui(root):
         # NOTE: Needlessly complicated... this is placeholder data anyways, but find a way to efficiently label each column per group
         ttk.Label(scrollable_frame, text=f"Item {int(i/2+1-0.5)}").grid(row=0, column=i, columnspan=2, padx=5, pady=5)
 
-    # Operational Conditions
-    operational_frame = ttk.LabelFrame(main_frame, text="Operational Conditions", padding=10)
-    operational_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=10)
+    # Create a container frame for Operational Conditions, Equipment List-Up, and Add Group
+    conditions_equipment_container = ttk.Frame(main_frame, padding=10)
+    conditions_equipment_container.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    conditions_equipment_container.grid_columnconfigure(0, weight=3)
+    conditions_equipment_container.grid_columnconfigure(1, weight=1)
+    conditions_equipment_container.grid_rowconfigure(0, weight=1)
+    conditions_equipment_container.grid_rowconfigure(1, weight=1)
+
+    # Operational Conditions (top left)
+    operational_frame = ttk.LabelFrame(conditions_equipment_container, text="Operational Conditions", padding=10, bootstyle="info")
+    operational_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+    operational_label = ttk.Label(operational_frame.winfo_toplevel(), text="Operational Conditions", font=bold_font)
+    operational_frame.configure(labelwidget=operational_label)
 
     ttk.Label(operational_frame, text="Fuel Phase:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
     fuel_phase_var = StringVar(value="Select Fuel Phase")
@@ -131,13 +152,19 @@ def create_group_ui(root):
     ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
     ttk.Spinbox(operational_frame, from_=0, to=500, increment=0.1).grid(row=1, column=3, sticky=W, padx=5, pady=5)
 
-    ttk.Button(operational_frame, text="Confirm", bootstyle=SUCCESS).grid(row=1, column=4, sticky=E, padx=5, pady=5)
+    # Add "Confirm" label and button in a frame for proper alignment
+    confirm_frame = ttk.Frame(operational_frame)
+    confirm_frame.grid(row=0, column=4, rowspan=2, sticky="nsew", padx=5, pady=5)
+    ttk.Label(confirm_frame, text="Confirm").pack(pady=(0, 5))
+    ttk.Button(confirm_frame, text="OK", bootstyle=SUCCESS).pack(fill="both", expand=True)
 
-    # Equipment List-Up
+    # Equipment List-Up (bottom left)
     equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Head Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Head Exchanger', '8. Tube Side Head Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
     
-    equipment_frame = ttk.LabelFrame(main_frame, text="Equipment List-Up", padding=10)
-    equipment_frame.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+    equipment_frame = ttk.LabelFrame(conditions_equipment_container, text="Equipment List-Up", padding=10)
+    equipment_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+    equipment_label = ttk.Label(equipment_frame.winfo_toplevel(), text="Equipment List-Up", font=bold_font)
+    equipment_frame.configure(labelwidget=equipment_label)
 
     ttk.Label(equipment_frame, text="Name of Equipment:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
     ttk.Combobox(equipment_frame, values=equipments, state="readonly").grid(row=1, column=0, sticky=W, padx=5, pady=5)
@@ -156,25 +183,54 @@ def create_group_ui(root):
     # fuel_phase_menu["menu"] = fuel_phase_menu.menu
 
     ttk.Label(equipment_frame, text="Size:").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    ttk.Combobox(equipment_frame, values=["≥12.5mm", "≥25mm", "≥50mm", "≥100mm", "≥150mm", "≥250mm", "≥350mm", "500mm"]).grid(row=1, column=1, sticky=W, padx=5, pady=5)
+    ttk.Combobox(equipment_frame, values=["≥12.5mm", "≥25mm", "≥50mm", "≥100mm", "≥150mm", "≥250mm", "≥350mm", "500mm"], state="readonly").grid(row=1, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Label(equipment_frame, text="EA:").grid(row=0, column=2, sticky=W, padx=5, pady=5)
     ttk.Spinbox(equipment_frame, from_=0, to=100, increment=1).grid(row=1, column=2, sticky=W, padx=5, pady=5)
 
-    ttk.Button(equipment_frame, text="Add", bootstyle=SECONDARY).grid(row=0, column=3, sticky=W, padx=5, pady=5)
-    ttk.Button(equipment_frame, text="Remove", bootstyle=DANGER).grid(row=1, column=3, sticky=W, padx=5, pady=5)
-    ttk.Button(equipment_frame, text="Confirm", bootstyle=SUCCESS).grid(row=2, column=3, sticky=W, padx=5, pady=5)
+    # Add/Remove/Confirm buttons column
+    ttk.Label(equipment_frame, text="Add").grid(row=0, column=3, sticky=W, padx=5, pady=5)
+    ttk.Button(equipment_frame, text="✓", bootstyle=SUCCESS, width=5).grid(row=1, column=3, sticky=W, padx=5, pady=5)
+    
+    ttk.Label(equipment_frame, text="Remove").grid(row=0, column=4, sticky=W, padx=5, pady=5)
+    ttk.Button(equipment_frame, text="−", bootstyle=INFO, width=5).grid(row=1, column=4, sticky=W, padx=5, pady=5)
+    
+    # Add "Confirm" label and button in a frame
+    confirm_equip_frame = ttk.Frame(equipment_frame)
+    confirm_equip_frame.grid(row=0, column=5, rowspan=2, sticky="nsew", padx=5, pady=5)
+    ttk.Label(confirm_equip_frame, text="Confirm").pack(pady=(0, 5))
+    ttk.Button(confirm_equip_frame, text="OK", bootstyle=SUCCESS).pack(fill="both", expand=True)
+
+    # Add Group Frame (right side, spanning 2 rows)
+    add_group_frame = ttk.LabelFrame(conditions_equipment_container, text="Add Group", padding=10)
+    add_group_frame.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=5)
+    add_group_label = ttk.Label(add_group_frame.winfo_toplevel(), text="Add Group", font=bold_font)
+    add_group_frame.configure(labelwidget=add_group_label)
+
+    # Add Group content
+    add_button_frame = ttk.Frame(add_group_frame)
+    add_button_frame.pack(pady=20, fill="both", expand=True)
+    ttk.Button(add_button_frame, text="Add", bootstyle=INFO, width=15).pack(pady=10)
+    
+    finish_label = ttk.Label(add_group_frame, text="Finish", font=bold_font)
+    finish_label.pack(pady=(20, 5))
+    
+    finish_button_frame = ttk.Frame(add_group_frame)
+    finish_button_frame.pack(pady=10, fill="both", expand=True)
+    ttk.Button(finish_button_frame, text="STOP", bootstyle=DANGER, width=15).pack(pady=10)
 
     # Group List
     group_list_frame = ttk.LabelFrame(main_frame, text="Group Specifics", padding=10)
-    group_list_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=10, pady=10)
+    group_list_frame.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+    group_specifics_label = ttk.Label(group_list_frame.winfo_toplevel(), text="Group Specifics", font=bold_font)
+    group_list_frame.configure(labelwidget=group_specifics_label)
 
     columns = ("No.", "Equip. List", "Size", "EA")
-    group_list_frame.grid_columnconfigure(0, weight=1)
+    group_list_frame.grid_columnconfigure(0, weight=0)
     group_list_frame.grid_columnconfigure(1, weight=1)
 
     # Add the spinbox section to the left
-    spinbox_label = ttk.Label(group_list_frame, text="Group No.", anchor="center")
+    spinbox_label = ttk.Labelframe(group_list_frame, text="Group No.")
     spinbox_label.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
     # NOTE: PLACEHOLDER FOR MAX GROUP.
@@ -182,7 +238,7 @@ def create_group_ui(root):
     max_group_no = 100
     # spinbox for group selection to view specifics
     for i in range(3):
-        spinbox = ttk.Spinbox(group_list_frame, from_=1, to=max_group_no, increment=1, width=10)
+        spinbox = ttk.Spinbox(spinbox_label, from_=1, to=max_group_no, increment=1, width=10)
         spinbox.grid(row=i + 1, column=0, sticky="ew", padx=5, pady=5)
 
     # # Add the second table section to the right
@@ -232,8 +288,6 @@ def create_group_ui(root):
         (10, 'Process Pipe', '≥50mm', 15),
     ]
 
-    group_list_frame.grid_columnconfigure(1, weight=1)
-
     table = Tableview(
         master=group_list_frame,
         coldata=coldata,
@@ -241,10 +295,23 @@ def create_group_ui(root):
         paginated=True,
         searchable=True,
         bootstyle="primary",
+        autofit=False,
+        autoalign=True,
+        stripecolor=(None, None),
     )
 
-    table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)
-
+    # Adjust the Tableview to stretch fully within its grid cell
+    table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=0, pady=0)
+    
+    # Make the table's internal treeview stretch columns to fill available width
+    try:
+        # Access the internal treeview and make columns stretch
+        tree = table.view
+        for col in tree['columns']:
+            tree.column(col, stretch=True)
+    except AttributeError:
+        pass  # Fallback if attribute name is different
+    
     # Prevent scrolling the entire window when interacting with a Combobox
     def disable_scroll(event):
         canvas.unbind_all("<MouseWheel>")
