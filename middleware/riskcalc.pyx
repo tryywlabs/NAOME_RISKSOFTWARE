@@ -1,6 +1,8 @@
 # This is the boilerplate for backend operations for the application
 # All Functions are dummy placeholders
 # TODO: Implement actual logic when calculation algorithms are received
+# TODO: Install Cython extension
+# NOTE: Same Functionality as the python file, but made just in case the calculation is too slow
 
 def calculate_risk_factor(params):
     # Placeholder function for risk calculation logic
