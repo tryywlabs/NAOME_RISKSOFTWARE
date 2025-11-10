@@ -1,6 +1,7 @@
 """
 FILE: database/validate_input.py
 DESCRIPTION: Functions to validate user input data before database insertion or processing.
+WHERE TO USE: All components that handle user input (this would be all tabs in the data entry notebook tab)
 TODO: Import inputs from frequency_data.py for validation routines.
 """
 

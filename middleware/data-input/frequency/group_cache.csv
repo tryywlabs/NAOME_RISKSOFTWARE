@@ -1,0 +1,7 @@
+Group_Number,Fuel_Phase,Pressure_Bar,Temperature_K,Size_mm,Equipment_Name,Equipment_Size,Equipment_EA
+1,Liquid,2.0,271.0,0.3,8. Tube Side Head Exchanger,≥100mm,1
+1,Liquid,2.0,271.0,0.3,10. Process Pipe,≥150mm,1
+1,Liquid,2.0,271.0,0.3,15. Manual Valve,≥100mm,1
+1,Liquid,2.0,271.0,0.3,16. Process Vessel,500mm,1
+2,Gas,100.0,310.0,100.0,5. Fin Fan Head Exchanger,≥350mm,1
+2,Gas,100.0,310.0,100.0,7. Shell Side Head Exchanger,≥12.5mm,1

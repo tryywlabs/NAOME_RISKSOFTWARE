@@ -24,10 +24,20 @@ from tkinter import ttk
 from tkinter import Canvas
 from tkinter import StringVar
 from tkinter.font import Font
+from tkinter import messagebox
+import sys
+import os
+
+# Add middleware to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency'))
+from frequency_group import FrequencyGroupManager
 
 '''FUNCTION: create_group_ui(root)'''
 def create_group_ui(root):
     """Create the group UI in the provided root window."""
+
+    # Initialize the group manager
+    group_manager = FrequencyGroupManager()
 
     # Create a canvas and scrollbar for scrolling
     canvas = Canvas(root)
@@ -114,7 +124,7 @@ def create_group_ui(root):
     # TODO: Replace with group data display
     for i in range(20):
         # NOTE: Needlessly complicated... this is placeholder data anyways, but find a way to efficiently label each column per group
-        ttk.Label(scrollable_frame, text=f"Item {int(i/2+1-0.5)}").grid(row=0, column=i, columnspan=2, padx=5, pady=5)
+        ttk.Label(scrollable_frame, text=f"Group {int(i/2+1-0.5)}").grid(row=0, column=i, columnspan=2, padx=5, pady=5)
 
     # Create a container frame for Operational Conditions, Equipment List-Up, and Add Group
     conditions_equipment_container = ttk.Frame(main_frame, padding=10)
@@ -144,19 +154,45 @@ def create_group_ui(root):
     fuel_phase_menu.menu.add_command(label="Gas", command=lambda: set_fuel_phase("Gas"))
 
     ttk.Label(operational_frame, text="Pressure (Bar):").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(operational_frame, from_=0, to=1000, increment=1).grid(row=1, column=1, sticky=W, padx=5, pady=5)
-
     ttk.Label(operational_frame, text="Temperature (K):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(operational_frame, from_=270, to=310, increment=1).grid(row=1, column=2, sticky=W, padx=5, pady=5)
-
     ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(operational_frame, from_=0, to=500, increment=0.1).grid(row=1, column=3, sticky=W, padx=5, pady=5)
 
+    # Callback for confirming operational conditions
+    def confirm_operational_conditions():
+        try:
+            # Get values from widgets
+            fuel_phase = fuel_phase_var.get()
+            if fuel_phase == "Select Fuel Phase":
+                raise ValueError("Please select a fuel phase")
+            
+            pressure = float(pressure_spinbox.get())
+            temperature = float(temperature_spinbox.get())
+            size = float(size_spinbox.get())
+            
+            # Update staging area
+            group_manager.set_staging_fuel_phase(fuel_phase)
+            group_manager.set_staging_pressure(pressure)
+            group_manager.set_staging_temperature(temperature)
+            group_manager.set_staging_size(size)
+            
+            messagebox.showinfo("Success", "Operational conditions confirmed!")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Invalid input: {str(e)}")
+    
+    # Store spinbox references
+    pressure_spinbox = ttk.Spinbox(operational_frame, from_=0, to=1000, increment=1)
+    temperature_spinbox = ttk.Spinbox(operational_frame, from_=270, to=310, increment=1)
+    size_spinbox = ttk.Spinbox(operational_frame, from_=0, to=500, increment=0.1)
+    
+    pressure_spinbox.grid(row=1, column=1, sticky=W, padx=5, pady=5)
+    temperature_spinbox.grid(row=1, column=2, sticky=W, padx=5, pady=5)
+    size_spinbox.grid(row=1, column=3, sticky=W, padx=5, pady=5)
+    
     # Add "Confirm" label and button in a frame for proper alignment
     confirm_frame = ttk.Frame(operational_frame)
     confirm_frame.grid(row=0, column=4, rowspan=2, sticky="nsew", padx=5, pady=5)
     ttk.Label(confirm_frame, text="Confirm").pack(pady=(0, 5))
-    ttk.Button(confirm_frame, text="OK", bootstyle=SUCCESS).pack(fill="both", expand=True)
+    ttk.Button(confirm_frame, text="OK", bootstyle=SUCCESS, command=confirm_operational_conditions).pack(fill="both", expand=True)
 
     # Equipment List-Up (bottom left)
     equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Head Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Head Exchanger', '8. Tube Side Head Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
@@ -167,7 +203,8 @@ def create_group_ui(root):
     equipment_frame.configure(labelwidget=equipment_label)
 
     ttk.Label(equipment_frame, text="Name of Equipment:").grid(row=0, column=0, sticky=W, padx=5, pady=5)
-    ttk.Combobox(equipment_frame, values=equipments, state="readonly").grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    equipment_combobox = ttk.Combobox(equipment_frame, values=equipments, state="readonly")
+    equipment_combobox.grid(row=1, column=0, sticky=W, padx=5, pady=5)
 
 
     # NOTE: Alternative using Menubutton for equipment selection
@@ -183,23 +220,64 @@ def create_group_ui(root):
     # fuel_phase_menu["menu"] = fuel_phase_menu.menu
 
     ttk.Label(equipment_frame, text="Size:").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    ttk.Combobox(equipment_frame, values=["≥12.5mm", "≥25mm", "≥50mm", "≥100mm", "≥150mm", "≥250mm", "≥350mm", "500mm"], state="readonly").grid(row=1, column=1, sticky=W, padx=5, pady=5)
+    size_combobox = ttk.Combobox(equipment_frame, values=["≥12.5mm", "≥25mm", "≥50mm", "≥100mm", "≥150mm", "≥250mm", "≥350mm", "500mm"], state="readonly")
+    size_combobox.grid(row=1, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Label(equipment_frame, text="EA:").grid(row=0, column=2, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(equipment_frame, from_=0, to=100, increment=1).grid(row=1, column=2, sticky=W, padx=5, pady=5)
+    ea_spinbox = ttk.Spinbox(equipment_frame, from_=0, to=100, increment=1)
+    ea_spinbox.grid(row=1, column=2, sticky=W, padx=5, pady=5)
 
+    # Staging equipment list to display current equipments
+    staging_equipment_listbox = []
+    
+    def update_staging_display():
+        """Update the display of staging equipments"""
+        # TODO: Update UI to show staging equipments
+        pass
+    
+    def add_equipment():
+        """Add equipment to staging area"""
+        try:
+            equipment_name = equipment_combobox.get()
+            if not equipment_name:
+                raise ValueError("Please select an equipment")
+            
+            size = size_combobox.get()
+            if not size:
+                raise ValueError("Please select a size")
+            
+            ea = int(ea_spinbox.get())
+            if ea <= 0:
+                raise ValueError("EA must be greater than 0")
+            
+            # Add to staging area
+            group_manager.add_staging_equipment(equipment_name, size, ea)
+            
+            # Clear inputs
+            equipment_combobox.set('')
+            size_combobox.set('')
+            ea_spinbox.set('0')
+            
+            messagebox.showinfo("Success", f"Added {equipment_name} to staging area")
+            update_staging_display()
+        except ValueError as e:
+            messagebox.showerror("Error", f"Invalid input: {str(e)}")
+    
+    def remove_equipment():
+        """Remove last equipment from staging area"""
+        if len(group_manager.staging_equipments) > 0:
+            group_manager.remove_staging_equipment(len(group_manager.staging_equipments) - 1)
+            messagebox.showinfo("Success", "Removed last equipment from staging area")
+            update_staging_display()
+        else:
+            messagebox.showwarning("Warning", "No equipment to remove")
+    
     # Add/Remove/Confirm buttons column
     ttk.Label(equipment_frame, text="Add").grid(row=0, column=3, sticky=W, padx=5, pady=5)
-    ttk.Button(equipment_frame, text="✓", bootstyle=SUCCESS, width=5).grid(row=1, column=3, sticky=W, padx=5, pady=5)
+    ttk.Button(equipment_frame, text="✓", bootstyle=SUCCESS, width=5, command=add_equipment).grid(row=1, column=3, sticky=W, padx=5, pady=5)
     
     ttk.Label(equipment_frame, text="Remove").grid(row=0, column=4, sticky=W, padx=5, pady=5)
-    ttk.Button(equipment_frame, text="−", bootstyle=INFO, width=5).grid(row=1, column=4, sticky=W, padx=5, pady=5)
-    
-    # Add "Confirm" label and button in a frame
-    confirm_equip_frame = ttk.Frame(equipment_frame)
-    confirm_equip_frame.grid(row=0, column=5, rowspan=2, sticky="nsew", padx=5, pady=5)
-    ttk.Label(confirm_equip_frame, text="Confirm").pack(pady=(0, 5))
-    ttk.Button(confirm_equip_frame, text="OK", bootstyle=SUCCESS).pack(fill="both", expand=True)
+    ttk.Button(equipment_frame, text="−", bootstyle=INFO, width=5, command=remove_equipment).grid(row=1, column=4, sticky=W, padx=5, pady=5)
 
     # Add Group Frame (right side, spanning 2 rows)
     add_group_frame = ttk.LabelFrame(conditions_equipment_container, text="Add Group", padding=10)
@@ -207,17 +285,56 @@ def create_group_ui(root):
     add_group_label = ttk.Label(add_group_frame.winfo_toplevel(), text="Add Group", font=bold_font)
     add_group_frame.configure(labelwidget=add_group_label)
 
+    # Callback for adding a group
+    def add_group():
+        """Add group from staging area"""
+        try:
+            if not group_manager.can_add_group():
+                missing = []
+                if not group_manager.staging_operational_conditions.is_complete():
+                    missing.append("operational conditions not complete")
+                if len(group_manager.staging_equipments) == 0:
+                    missing.append("no equipment added")
+                raise ValueError(f"Cannot add group: {', '.join(missing)}")
+            
+            group = group_manager.add_group()
+            
+            # Save to cache file
+            if group_manager.save_to_cache():
+                messagebox.showinfo("Success", 
+                    f"Group {group.group_number} created with {len(group.equipments)} equipment(s) and saved to cache!")
+            else:
+                messagebox.showwarning("Warning", 
+                    f"Group {group.group_number} created but failed to save to cache")
+            
+            # TODO: Update groups display
+            update_staging_display()
+        except ValueError as e:
+            messagebox.showerror("Error", str(e))
+    
+    def finish_groups():
+        """Finish creating groups"""
+        if len(group_manager.groups) == 0:
+            messagebox.showwarning("Warning", "No groups have been created yet")
+            return
+        
+        result = messagebox.askyesno("Confirm", 
+            f"You have created {len(group_manager.groups)} group(s). Finish and proceed?")
+        if result:
+            messagebox.showinfo("Success", "Groups finalized!")
+            # TODO: Proceed to next step or save groups
+    
     # Add Group content
     add_button_frame = ttk.Frame(add_group_frame)
     add_button_frame.pack(pady=20, fill="both", expand=True)
-    ttk.Button(add_button_frame, text="Add", bootstyle=INFO, width=15).pack(pady=10)
+    ttk.Button(add_button_frame, text="Add", bootstyle=INFO, width=15, command=add_group).pack(pady=10)
     
     finish_label = ttk.Label(add_group_frame, text="Finish", font=bold_font)
     finish_label.pack(pady=(20, 5))
     
     finish_button_frame = ttk.Frame(add_group_frame)
     finish_button_frame.pack(pady=10, fill="both", expand=True)
-    ttk.Button(finish_button_frame, text="STOP", bootstyle=DANGER, width=15).pack(pady=10)
+    ttk.Button(finish_button_frame, text="STOP", bootstyle=DANGER, width=15, command=finish_groups).pack(pady=10)
 
     # Group List
     group_list_frame = ttk.LabelFrame(main_frame, text="Group Specifics", padding=10)
