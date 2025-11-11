@@ -72,59 +72,147 @@ def create_group_ui(root):
     # Apply bold font to the label
     grouping_label = ttk.Label(grouping_frame.winfo_toplevel(), text="Grouping", font=bold_font)
     grouping_frame.configure(labelwidget=grouping_label)
-
-    ttk.Label(grouping_frame, text="Operation hours (/ year):").grid(row=1, column=0, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(grouping_frame, from_=0, to=10000, increment=1).grid(row=1, column=1, sticky=W, padx=5, pady=5)
-
-    ttk.Label(grouping_frame, text="Phase:").grid(row=2, column=0, sticky=W, padx=5, pady=5)
-    ttk.Combobox(grouping_frame, values=["Liquid", "Gas"], state="readonly").grid(row=2, column=1, sticky=W, padx=5, pady=5)
-
-    ttk.Label(grouping_frame, text="Working Press. (Bar):").grid(row=3, column=0, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(grouping_frame, from_=0, to=10000, increment=1).grid(row=3, column=1, sticky=W, padx=5, pady=5)
-
-    ttk.Label(grouping_frame, text="Working Temp. (K):").grid(row=4, column=0, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(grouping_frame, from_=270, to=310, increment=1).grid(row=4, column=1, sticky=W, padx=5, pady=5)
-
-    ttk.Label(grouping_frame, text="System Size (mm):").grid(row=5, column=0, sticky=W, padx=5, pady=5)
-    ttk.Spinbox(grouping_frame, from_=0, to=10000, increment=0.1).grid(row=5, column=1, sticky=W, padx=5, pady=5)
-
-    group_save_frame = ttk.LabelFrame(grouping_frame, text="Save Group Results", padding=10)
-    group_save_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-    save_label = ttk.Label(group_save_frame.winfo_toplevel(), text="Save Group Results", font=bold_font)
-    group_save_frame.configure(labelwidget=save_label)
-
-    ttk.Button(group_save_frame, text="Save", bootstyle=SUCCESS).grid(row=0, column=1, sticky=NSEW, padx=5, pady=5)
-
-    # Add a scrollable inner box inside the grouping section
-    inner_group_frame = ttk.LabelFrame(grouping_frame, text="View of All Groups ", padding=10)
-    inner_group_frame.grid(row=0, column=2, columnspan=2, rowspan=6, sticky="nsew", padx=10, pady=5)
-    view_label = ttk.Label(inner_group_frame.winfo_toplevel(), text="View of All Groups ", font=bold_font)
-    inner_group_frame.configure(labelwidget=view_label)
-
-    # Create a canvas and scrollbar for horizontal scrolling
-    inner_canvas = Canvas(inner_group_frame)
-    h_scrollbar = ttk.Scrollbar(inner_group_frame, orient="horizontal", command=inner_canvas.xview)
-    inner_canvas.configure(xscrollcommand=h_scrollbar.set)
-
-    # Pack the canvas and scrollbar
-    inner_canvas.pack(side="top", fill="both", expand=True)
-    h_scrollbar.pack(side="bottom", fill="x")
-
-    # Create a frame inside the canvas
-    scrollable_frame = ttk.Frame(inner_canvas)
-    inner_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-
-    # Configure the canvas to scroll horizontally
-    def configure_inner_scroll_region(event):
-        inner_canvas.configure(scrollregion=inner_canvas.bbox("all"))
-
-    scrollable_frame.bind("<Configure>", configure_inner_scroll_region)
-
-    # Add placeholder content to the scrollable frame
-    # TODO: Replace with group data display
-    for i in range(20):
-        # NOTE: Needlessly complicated... this is placeholder data anyways, but find a way to efficiently label each column per group
-        ttk.Label(scrollable_frame, text=f"Group {int(i/2+1-0.5)}").grid(row=0, column=i, columnspan=2, padx=5, pady=5)
+    
+    # Configure grid columns - 2 column layout
+    grouping_frame.grid_columnconfigure(0, weight=0, minsize=200)  # Left panel (controls)
+    grouping_frame.grid_columnconfigure(1, weight=1)  # Right panel (view of all groups)
+    grouping_frame.grid_rowconfigure(0, weight=1)  # Single row that expands
+    
+    # Left panel - Group controls (save, operation hours, reset)
+    controls_frame = ttk.LabelFrame(grouping_frame, text="Group Controls", padding=10)
+    controls_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+    controls_label = ttk.Label(controls_frame.winfo_toplevel(), text="Group Controls", font=bold_font)
+    controls_frame.configure(labelwidget=controls_label)
+    
+    # Operation hours input
+    ttk.Label(controls_frame, text="Operation hours (/ year)").pack(anchor=W, pady=(5, 5))
+    operation_hours_spinbox = ttk.Spinbox(controls_frame, from_=0, to=10000, increment=1, width=15)
+    operation_hours_spinbox.pack(fill=X, pady=(0, 15))
+    operation_hours_spinbox.set(0)  # Default value
+    
+    # Save button
+    ttk.Label(controls_frame, text="Save Groups").pack(anchor=W, pady=(5, 5))
+    ttk.Button(controls_frame, text="Save", bootstyle=INFO, width=15).pack(fill=X, pady=(0, 15))
+    
+    # Reset groups function
+    def reset_groups():
+        """Reset all groups - clear cache and staging area"""
+        result = messagebox.askyesno("Confirm Reset", 
+            "This will delete all groups and clear the cache. Are you sure?")
+        if result:
+            # Clear groups from manager
+            group_manager.groups = []
+            group_manager.group_counter = 0
+            
+            # Clear staging area
+            group_manager.staging_equipments = []
+            group_manager.staging_operational_conditions.fuel_phase = None
+            group_manager.staging_operational_conditions.pressure = None
+            group_manager.staging_operational_conditions.temperature = None
+            group_manager.staging_operational_conditions.size = None
+            
+            # Delete cache file
+            import os
+            # Relative cache routing
+            cache_file = os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency/group_cache.csv')
+            if os.path.exists(cache_file):
+                os.remove(cache_file)
+            
+            # Update display
+            update_groups_display()
+            messagebox.showinfo("Success", "All groups have been reset!")
+    
+    # Reset button
+    ttk.Label(controls_frame, text="Reset All Groups").pack(anchor=W, pady=(5, 5))
+    ttk.Button(controls_frame, text="Reset", bootstyle=DANGER, width=15, command=reset_groups).pack(fill=X, pady=(0, 5))
+    
+    # Create a labeled frame to group row headers and groups view
+    view_all_frame = ttk.LabelFrame(grouping_frame, text="View of All Groups", padding=5)
+    view_all_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+    view_all_label = ttk.Label(view_all_frame.winfo_toplevel(), text="View of All Groups", font=bold_font)
+    view_all_frame.configure(labelwidget=view_all_label)
+    
+    # Configure columns within the view_all_frame
+    view_all_frame.grid_columnconfigure(0, weight=0, minsize=200)  # Headers column
+    view_all_frame.grid_columnconfigure(1, weight=1)  # Groups view column (expandable)
+    
+    # Row headers in left column
+    headers_frame = ttk.Frame(view_all_frame, padding=5)
+    headers_frame.grid(row=0, column=0, sticky="nsw", padx=(5, 10), pady=5)
+    
+    # Add spacing for header alignment (to match button row)
+    ttk.Label(headers_frame, text=" ").grid(row=0, column=0, sticky="ew", pady=(0, 5))
+    
+    # Add row header labels with consistent spacing
+    ttk.Label(headers_frame, text="Phase", width=20, anchor=W).grid(row=1, column=0, sticky="ew", pady=3)
+    ttk.Label(headers_frame, text="Working Press. (bar)", width=20, anchor=W).grid(row=2, column=0, sticky="ew", pady=3)
+    ttk.Label(headers_frame, text="Working Temp. (K)", width=20, anchor=W).grid(row=3, column=0, sticky="ew", pady=3)
+    ttk.Label(headers_frame, text="System Size (mm)", width=20, anchor=W).grid(row=4, column=0, sticky="ew", pady=3)
+    
+    # Create container for groups with canvas in right column
+    groups_container = ttk.Frame(view_all_frame, padding=5)
+    groups_container.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+    
+    # Create canvas for horizontal scrolling of groups
+    groups_canvas = Canvas(groups_container)
+    h_scrollbar = ttk.Scrollbar(groups_container, orient="horizontal", command=groups_canvas.xview)
+    groups_canvas.configure(xscrollcommand=h_scrollbar.set)
+    
+    groups_canvas.pack(side=TOP, fill=BOTH, expand=True)
+    h_scrollbar.pack(side=BOTTOM, fill=X)
+    
+    # Create frame for groups inside canvas
+    groups_scrollable_frame = ttk.Frame(groups_canvas)
+    groups_canvas.create_window((0, 0), window=groups_scrollable_frame, anchor="nw")
+    
+    def configure_groups_scroll_region(event):
+        groups_canvas.configure(scrollregion=groups_canvas.bbox("all"))
+    
+    groups_scrollable_frame.bind("<Configure>", configure_groups_scroll_region)
+    
+    # Function to update group display
+    def update_groups_display():
+        """Update the View of All Groups display with current groups"""
+        # Clear existing group cards
+        for widget in groups_scrollable_frame.winfo_children():
+            widget.destroy()
+        
+        # Check if there are any groups
+        all_groups = group_manager.get_all_groups()
+        if len(all_groups) == 0:
+            # Display placeholder when no groups exist
+            placeholder = ttk.Label(
+                groups_scrollable_frame, 
+                text="No Groups Detected", 
+                font=("Helvetica", 14, "italic"),
+                foreground="gray"
+            )
+            placeholder.grid(row=0, column=0, padx=20, pady=20)
+            return
+        
+        # Display each group
+        for idx, group in enumerate(all_groups):
+            # Create group card
+            group_card = ttk.Frame(groups_scrollable_frame, relief="ridge", borderwidth=2, padding=5)
+            group_card.grid(row=0, column=idx, padx=5, pady=0, sticky="nsew")
+            
+            # Group header
+            header_label = ttk.Label(
+                group_card, 
+                text=f"Group {group.group_number}",
+                font=("Helvetica", 10, "bold"),
+                anchor=CENTER
+            )
+            header_label.grid(row=0, column=0, sticky="ew", pady=(0, 5))
+            
+            # Group data labels with consistent height to match headers
+            ttk.Label(group_card, text=str(group.operational_conditions.fuel_phase or ""), width=15, anchor=CENTER).grid(row=1, column=0, sticky="ew", pady=3)
+            ttk.Label(group_card, text=str(group.operational_conditions.pressure or "0"), width=15, anchor=CENTER).grid(row=2, column=0, sticky="ew", pady=3)
+            ttk.Label(group_card, text=str(group.operational_conditions.temperature or "0"), width=15, anchor=CENTER).grid(row=3, column=0, sticky="ew", pady=3)
+            ttk.Label(group_card, text=str(group.operational_conditions.size or "0"), width=15, anchor=CENTER).grid(row=4, column=0, sticky="ew", pady=3)
+    
+    # Initial display
+    update_groups_display()
 
     # Create a container frame for Operational Conditions, Equipment List-Up, and Add Group
     conditions_equipment_container = ttk.Frame(main_frame, padding=10)
@@ -231,9 +319,8 @@ def create_group_ui(root):
     staging_equipment_listbox = []
     
     def update_staging_display():
-        """Update the display of staging equipments"""
-        # TODO: Update UI to show staging equipments
-        pass
+        """Update the display of staging equipments and groups"""
+        update_groups_display()
     
     def add_equipment():
         """Add equipment to staging area"""
@@ -460,11 +547,6 @@ def create_group_ui(root):
         root.focus_set()
 
     canvas.bind("<Button-1>", clear_focus)
-
-    # Ensure only the column for "View of All Groups" expands
-    grouping_frame.grid_columnconfigure(0, weight=0)
-    grouping_frame.grid_columnconfigure(1, weight=0)
-    grouping_frame.grid_columnconfigure(2, weight=1)
 
 if __name__ == "__main__":
     root = tb.Window(themename="pulse")

@@ -14,5 +14,5 @@ supabase: Client = create_client(url, key)
 
 if __name__ == "__main__":
     # Simple test to verify connection
-    response = supabase.table("10_Process_Pipe").select("*").execute()
+    response = supabase.table("10_Process_Pipe").select("*").eq("equipment_size", "12.5A").execute()
     print(response.data)

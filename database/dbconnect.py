@@ -1,7 +1,7 @@
 '''
 FILE: database/dbconnect.py
 DESCRIPTION: Database connection setup using environment variables for secure configuration.
-NOTE: DB is currently running on the free tier of supabase.
+NOTE: DEPRECATED, use supabase_connect.py for database connections.
 '''
 
 import psycopg2
