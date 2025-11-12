@@ -4,3 +4,5 @@ Group_Number,Fuel_Phase,Pressure_Bar,Temperature_K,Size_mm,Equipment_Name,Equipm
 2,Liquid,8.0,300.0,150.0,8. Tube Side Head Exchanger,≥150mm,3
 2,Liquid,8.0,300.0,150.0,15. Manual Valve,≥50mm,1
 3,Gas,3.0,400.0,300.0,3. Filter,≥50mm,3
+4,Gas,12.0,290.0,111.0,5. Fin Fan Head Exchanger,≥50mm,1
+4,Gas,12.0,290.0,111.0,5. Fin Fan Head Exchanger,≥150mm,2
