@@ -149,7 +149,7 @@ def create_group_ui(root):
     # Add row header labels with consistent spacing
     ttk.Label(headers_frame, text="Phase", width=20, anchor=W).grid(row=1, column=0, sticky="ew", pady=3)
     ttk.Label(headers_frame, text="Working Press. (bar)", width=20, anchor=W).grid(row=2, column=0, sticky="ew", pady=3)
-    ttk.Label(headers_frame, text="Working Temp. (K)", width=20, anchor=W).grid(row=3, column=0, sticky="ew", pady=3)
+    ttk.Label(headers_frame, text="Working Temp. (C)", width=20, anchor=W).grid(row=3, column=0, sticky="ew", pady=3)
     ttk.Label(headers_frame, text="System Size (mm)", width=20, anchor=W).grid(row=4, column=0, sticky="ew", pady=3)
     
     # Create container for groups with canvas in right column
