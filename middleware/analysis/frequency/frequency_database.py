@@ -13,7 +13,7 @@ from supabase_connect import supabase
 def convert_equipment_name_to_table(equipment_name: str) -> str:
     """
     Convert equipment name to database table name format
-    Example: '8. Tube Side Head Exchanger' -> '8_Tube_Side_Heat_Exchanger'
+    Example: '8. Tube Side Heat Exchanger' -> '8_Tube_Side_Heat_Exchanger'
     Note: Database tables use underscores with each word capitalized
     """
     # Remove number prefix and clean the name
@@ -73,7 +73,7 @@ def get_equipment_failure_rates(equipment_name: str, equipment_size: str):
     Retrieve failure rate data for a specific equipment and size from the database
     
     Args:
-        equipment_name: Name of the equipment (e.g., '8. Tube Side Head Exchanger')
+        equipment_name: Name of the equipment (e.g., '8. Tube Side Heat Exchanger')
         equipment_size: Size of the equipment (e.g., '≥100mm')
     
     Returns:
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     # Test the functions
     test_equipment = {
         'Group_Number': 1,
-        'Equipment_Name': '8. Tube Side Head Exchanger',
+        'Equipment_Name': '8. Tube Side Heat Exchanger',
         'Equipment_Size': '≥100mm',
         'Equipment_EA': 3
     }

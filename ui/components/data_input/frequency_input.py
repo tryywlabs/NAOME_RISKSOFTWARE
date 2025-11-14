@@ -28,7 +28,7 @@ from tkinter import messagebox
 import sys
 import os
 
-# Add middleware to path
+'''Middleware API IMPORT'''
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency'))
 from frequency_group import FrequencyGroupManager
 
@@ -54,7 +54,7 @@ def create_group_ui(root):
     # Add the frame to the canvas
     canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
-    # Configure the canvas to scroll
+    '''INNER FUNCTION: enable scrolling region'''
     def configure_scroll_region(event):
         canvas.configure(scrollregion=canvas.bbox("all"))
 
@@ -85,16 +85,19 @@ def create_group_ui(root):
     controls_frame.configure(labelwidget=controls_label)
     
     # Operation hours input
-    ttk.Label(controls_frame, text="Operation hours (/ year)").pack(anchor=W, pady=(5, 5))
+    ttk.Label(controls_frame, text="Operation hours ( /year)").pack(anchor=W, pady=(5, 5))
     operation_hours_spinbox = ttk.Spinbox(controls_frame, from_=0, to=10000, increment=1, width=15)
     operation_hours_spinbox.pack(fill=X, pady=(0, 15))
     operation_hours_spinbox.set(0)  # Default value
     
     # Save button
+    # Saves to the following location: RISKSOFTWARE/middleware/data-input/frequency/group_cache.csv
+    # The CSV file is effectively acting as a simple cache, where it is created if not exists & updated when a group is added
+    # The CSV file is deleted when "Reset" is clicked
     ttk.Label(controls_frame, text="Save Groups").pack(anchor=W, pady=(5, 5))
     ttk.Button(controls_frame, text="Save", bootstyle=INFO, width=15).pack(fill=X, pady=(0, 15))
     
-    # Reset groups function
+    '''FUNCTION: reset_groups() wipes the group cache and staging area'''
     def reset_groups():
         """Reset all groups - clear cache and staging area"""
         result = messagebox.askyesno("Confirm Reset", 
@@ -102,7 +105,7 @@ def create_group_ui(root):
         if result:
             # Clear groups from manager
             group_manager.groups = []
-            group_manager.group_counter = 0
+            group_manager.current_group_number = 1
             
             # Clear staging area
             group_manager.staging_equipments = []
@@ -165,12 +168,13 @@ def create_group_ui(root):
     groups_scrollable_frame = ttk.Frame(groups_canvas)
     groups_canvas.create_window((0, 0), window=groups_scrollable_frame, anchor="nw")
     
+    '''INNER FUNCTION: enable inner scrolling region'''
     def configure_groups_scroll_region(event):
         groups_canvas.configure(scrollregion=groups_canvas.bbox("all"))
     
     groups_scrollable_frame.bind("<Configure>", configure_groups_scroll_region)
     
-    # Function to update group display
+    '''INNER FUNCTION: update_groups_display() renders all groups'''
     def update_groups_display():
         """Update the View of All Groups display with current groups"""
         # Clear existing group cards
@@ -183,8 +187,6 @@ def create_group_ui(root):
             # Display placeholder when no groups exist
             placeholder = ttk.Label(
                 groups_scrollable_frame, 
-                text="No Groups Detected", 
-                font=("Helvetica", 14, "italic"),
                 foreground="gray"
             )
             placeholder.grid(row=0, column=0, padx=20, pady=20)
@@ -242,10 +244,10 @@ def create_group_ui(root):
     fuel_phase_menu.menu.add_command(label="Gas", command=lambda: set_fuel_phase("Gas"))
 
     ttk.Label(operational_frame, text="Pressure (Bar):").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    ttk.Label(operational_frame, text="Temperature (K):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
+    ttk.Label(operational_frame, text="Temperature (C):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
     ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
 
-    # Callback for confirming operational conditions
+    '''INNER FUNCTION: confirm_operational_conditions() validates & saves staging data'''
     def confirm_operational_conditions():
         try:
             # Get values from widgets
@@ -269,7 +271,7 @@ def create_group_ui(root):
     
     # Store spinbox references
     pressure_spinbox = ttk.Spinbox(operational_frame, from_=0, to=1000, increment=1)
-    temperature_spinbox = ttk.Spinbox(operational_frame, from_=270, to=310, increment=1)
+    temperature_spinbox = ttk.Spinbox(operational_frame, from_=-2, to=30, increment=0.1)
     size_spinbox = ttk.Spinbox(operational_frame, from_=0, to=500, increment=0.1)
     
     pressure_spinbox.grid(row=1, column=1, sticky=W, padx=5, pady=5)
@@ -283,7 +285,28 @@ def create_group_ui(root):
     ttk.Button(confirm_frame, text="OK", bootstyle=SUCCESS, command=confirm_operational_conditions).pack(fill="both", expand=True)
 
     # Equipment List-Up (bottom left)
-    equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Head Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Head Exchanger', '8. Tube Side Head Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
+    equipments = ['1. Centrifugal Compressor', '2. Reciprocating Compressor', '3. Filter', '4. Flange', '5. Fin Fan Heat Exchanger', '6. Plate Heat Exchanger', '7. Shell Side Heat Exchanger', '8. Tube Side Heat Exchanger', '9. Pig Trap', '10. Process Pipe', '11. Centrifugal Pump', '12. Reciprocating Pump', '13. Small Bore Fitting', '14. Actuated Valve', '15. Manual Valve', '16. Process Vessel', '17. Atmospheric Storage Vessel']
+    
+    # Define size ranges for each equipment type
+    equipment_sizes = {
+        '1. Centrifugal Compressor': ['12.5A', '25A', '50A', '100A', '125A'],
+        '2. Reciprocating Compressor': ['12.5A', '25A', '50A', '100A', '125A'],
+        '3. Filter': ['12.5A', '25A', '50A', '100A', '125A'],
+        '4. Flange': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
+        '5. Fin Fan Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
+        '6. Plate Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
+        '7. Shell Side Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
+        '8. Tube Side Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
+        '9. Pig Trap': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
+        '10. Process Pipe': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
+        '11. Centrifugal Pump': ['12.5A', '25A', '50A', '100A', '125A'],
+        '12. Reciprocating Pump': ['12.5A', '25A', '50A', '100A', '125A'],
+        '13. Small Bore Fitting': ['12.5A', '25A', '50A'],
+        '14. Actuated Valve': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
+        '15. Manual Valve': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
+        '16. Process Vessel': ['12.5A', '25A', '50A', '100A', '125A'],
+        '17. Atmospheric Storage Vessel': ['12.5A', '25A', '50A', '100A', '125A']
+    }
     
     equipment_frame = ttk.LabelFrame(conditions_equipment_container, text="Equipment List-Up", padding=10)
     equipment_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
@@ -308,12 +331,26 @@ def create_group_ui(root):
     # fuel_phase_menu["menu"] = fuel_phase_menu.menu
 
     ttk.Label(equipment_frame, text="Size:").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    size_combobox = ttk.Combobox(equipment_frame, values=["≥12.5mm", "≥25mm", "≥50mm", "≥100mm", "≥150mm", "≥250mm", "≥350mm", "500mm"], state="readonly")
+    size_combobox = ttk.Combobox(equipment_frame, values=[], state="readonly")
     size_combobox.grid(row=1, column=1, sticky=W, padx=5, pady=5)
 
     ttk.Label(equipment_frame, text="EA:").grid(row=0, column=2, sticky=W, padx=5, pady=5)
-    ea_spinbox = ttk.Spinbox(equipment_frame, from_=0, to=100, increment=1)
+    ea_spinbox = ttk.Spinbox(equipment_frame, from_=1, to=100, increment=1)
     ea_spinbox.grid(row=1, column=2, sticky=W, padx=5, pady=5)
+    
+    '''INNER FUNCTION: update_size_options() updates size combobox based on selected equipment'''
+    def update_size_options(event=None):
+        """Update size combobox values based on selected equipment"""
+        selected_equipment = equipment_combobox.get()
+        if selected_equipment in equipment_sizes:
+            size_combobox['values'] = equipment_sizes[selected_equipment]
+            size_combobox.set('')  # Clear current selection
+        else:
+            size_combobox['values'] = []
+            size_combobox.set('')
+    
+    # Bind equipment selection to update size options
+    equipment_combobox.bind('<<ComboboxSelected>>', update_size_options)
 
     # Staging equipment list to display current equipments
     staging_equipment_listbox = []
@@ -372,7 +409,7 @@ def create_group_ui(root):
     add_group_label = ttk.Label(add_group_frame.winfo_toplevel(), text="Add Group", font=bold_font)
     add_group_frame.configure(labelwidget=add_group_label)
 
-    # Callback for adding a group
+    '''INNER FUNCTION: add_group() validates staging data and adds a new group'''
     def add_group():
         """Add group from staging area"""
         try:
@@ -484,10 +521,10 @@ def create_group_ui(root):
         (2, 'Reciprocating Compressor', '≥50mm', 3),
         (3, 'Filter', '≥25mm', 10),
         (4, 'Flange', '≥12.5mm', 20),
-        (5, 'Fin Fan Head Exchanger', '≥150mm', 2),
+        (5, 'Fin Fan Heat Exchanger', '≥150mm', 2),
         (6, 'Plate Heat Exchanger', '≥100mm', 4),
-        (7, 'Shell Side Head Exchanger', '≥250mm', 1),
-        (8, 'Tube Side Head Exchanger', '≥250mm', 1),
+        (7, 'Shell Side Heat Exchanger', '≥250mm', 1),
+        (8, 'Tube Side Heat Exchanger', '≥250mm', 1),
         (9, 'Pig Trap', '≥100mm', 2),
         (10, 'Process Pipe', '≥50mm', 15),
     ]

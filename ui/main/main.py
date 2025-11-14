@@ -37,7 +37,7 @@ import pathlib
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/data_input')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/analysis/analysis_freq')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/analysis/frequency')))
 from frequency_input import create_group_ui
 from frequency_analysis import create_frequency_analysis_ui
 
