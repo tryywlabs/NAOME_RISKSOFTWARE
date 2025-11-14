@@ -149,7 +149,7 @@ def create_group_ui(root):
     # Add row header labels with consistent spacing
     ttk.Label(headers_frame, text="Phase", width=20, anchor=W).grid(row=1, column=0, sticky="ew", pady=3)
     ttk.Label(headers_frame, text="Working Press. (bar)", width=20, anchor=W).grid(row=2, column=0, sticky="ew", pady=3)
-    ttk.Label(headers_frame, text="Working Temp. (C)", width=20, anchor=W).grid(row=3, column=0, sticky="ew", pady=3)
+    ttk.Label(headers_frame, text="Working Temp. (°C)", width=20, anchor=W).grid(row=3, column=0, sticky="ew", pady=3)
     ttk.Label(headers_frame, text="System Size (mm)", width=20, anchor=W).grid(row=4, column=0, sticky="ew", pady=3)
     
     # Create container for groups with canvas in right column
@@ -244,7 +244,7 @@ def create_group_ui(root):
     fuel_phase_menu.menu.add_command(label="Gas", command=lambda: set_fuel_phase("Gas"))
 
     ttk.Label(operational_frame, text="Pressure (Bar):").grid(row=0, column=1, sticky=W, padx=5, pady=5)
-    ttk.Label(operational_frame, text="Temperature (C):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
+    ttk.Label(operational_frame, text="Temperature (°C):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
     ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
 
     '''INNER FUNCTION: confirm_operational_conditions() validates & saves staging data'''
@@ -289,23 +289,23 @@ def create_group_ui(root):
     
     # Define size ranges for each equipment type
     equipment_sizes = {
-        '1. Centrifugal Compressor': ['12.5A', '25A', '50A', '100A', '125A'],
-        '2. Reciprocating Compressor': ['12.5A', '25A', '50A', '100A', '125A'],
-        '3. Filter': ['12.5A', '25A', '50A', '100A', '125A'],
-        '4. Flange': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
-        '5. Fin Fan Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
-        '6. Plate Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
-        '7. Shell Side Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
-        '8. Tube Side Heat Exchanger': ['12.5A', '25A', '50A', '100A', '125A'],
-        '9. Pig Trap': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
-        '10. Process Pipe': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
-        '11. Centrifugal Pump': ['12.5A', '25A', '50A', '100A', '125A'],
-        '12. Reciprocating Pump': ['12.5A', '25A', '50A', '100A', '125A'],
-        '13. Small Bore Fitting': ['12.5A', '25A', '50A'],
-        '14. Actuated Valve': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
-        '15. Manual Valve': ['12.5A', '25A', '50A', '100A', '125A', '250A', '350A', '500A'],
-        '16. Process Vessel': ['12.5A', '25A', '50A', '100A', '125A'],
-        '17. Atmospheric Storage Vessel': ['12.5A', '25A', '50A', '100A', '125A']
+        '1. Centrifugal Compressor': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '2. Reciprocating Compressor': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '3. Filter': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '4. Flange': ['12.5mm', '25mm', '50mm', '100mm', '125mm', '250mm', '350mm', '500mm'],
+        '5. Fin Fan Heat Exchanger': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '6. Plate Heat Exchanger': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '7. Shell Side Heat Exchanger': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '8. Tube Side Heat Exchanger': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '9. Pig Trap': ['12.5mm', '25mm', '50mm', '100mm', '125mm', '250mm', '350mm', '500mm'],
+        '10. Process Pipe': ['12.5mm', '25mm', '50mm', '100mm', '125mm', '250mm', '350mm', '500mm'],
+        '11. Centrifugal Pump': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '12. Reciprocating Pump': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '13. Small Bore Fitting': ['12.5mm', '25mm', '50mm'],
+        '14. Actuated Valve': ['12.5mm', '25mm', '50mm', '100mm', '125mm', '250mm', '350mm', '500mm'],
+        '15. Manual Valve': ['12.5mm', '25mm', '50mm', '100mm', '125mm', '250mm', '350mm', '500mm'],
+        '16. Process Vessel': ['12.5mm', '25mm', '50mm', '100mm', '125mm'],
+        '17. Atmospheric Storage Vessel': ['12.5mm', '25mm', '50mm', '100mm', '125mm']
     }
     
     equipment_frame = ttk.LabelFrame(conditions_equipment_container, text="Equipment List-Up", padding=10)
