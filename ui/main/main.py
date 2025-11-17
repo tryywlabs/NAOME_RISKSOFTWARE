@@ -16,6 +16,8 @@ FUNCTIONS:
     2. main():
         Create the main application window, set up ttkbootstrap if available,
         and launch the nested notebook demo.
+
+NOTE: The Icons must be change so that Windows can also display them properly.
 """
 
 '''IMPORT STATEMENTS'''
@@ -90,7 +92,7 @@ def build(root, style=None):
             style.configure('TLabel', background=background_color, foreground=text_color)
     
     # Set initial button text based on current theme
-    initial_button_text = '🌙 Dark Mode' if current_theme['name'] == 'pulse' else '☀️ Light Mode'
+    initial_button_text = '🌙 Dark Mode' if current_theme['name'] == 'pulse' else '☀️ Light `Mode'
     theme_button = tb.Button(top_frame, text=initial_button_text, command=toggle_theme, bootstyle='secondary-outline') if TB_AVAILABLE else ttk.Button(top_frame, text=initial_button_text, command=toggle_theme)
     theme_button.pack(side='right', padx=5)
 
