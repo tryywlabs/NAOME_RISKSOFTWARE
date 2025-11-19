@@ -30,7 +30,7 @@ import os
 
 '''Middleware API IMPORT'''
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency'))
-from frequency_group import FrequencyGroupManager
+from frequency_group import FrequencyGroupManager, FrequencyGroup, OperationalConditions, FrequencyEquipment
 
 '''FUNCTION: create_group_ui(root)'''
 def create_group_ui(root):
@@ -38,6 +38,9 @@ def create_group_ui(root):
 
     # Initialize the group manager
     group_manager = FrequencyGroupManager()
+    
+    # Track the current staging group number
+    current_staging_group = {'number': None}
 
     # Create a canvas and scrollbar for scrolling
     canvas = Canvas(root)
@@ -247,7 +250,7 @@ def create_group_ui(root):
     ttk.Label(operational_frame, text="Temperature (°C):").grid(row=0, column=2, sticky=W, padx=5, pady=5)
     ttk.Label(operational_frame, text="Size (mm):").grid(row=0, column=3, sticky=W, padx=5, pady=5)
 
-    '''INNER FUNCTION: confirm_operational_conditions() validates & saves staging data'''
+    '''INNER FUNCTION: confirm_operational_conditions() validates & saves staging data and creates group'''
     def confirm_operational_conditions():
         try:
             # Get values from widgets
@@ -265,7 +268,18 @@ def create_group_ui(root):
             group_manager.set_staging_temperature(temperature)
             group_manager.set_staging_size(size)
             
-            messagebox.showinfo("Success", "Operational conditions confirmed!")
+            # Create a new group immediately with these conditions
+            op_conditions = OperationalConditions(fuel_phase, pressure, temperature, size)
+            new_group = FrequencyGroup(group_manager.current_group_number, op_conditions)
+            group_manager.groups.append(new_group)
+            current_staging_group['number'] = new_group.group_number
+            group_manager.current_group_number += 1
+            
+            # Update displays
+            update_groups_display()
+            update_group_specifics_for_group(current_staging_group)
+            
+            messagebox.showinfo("Success", f"Group {current_staging_group['number']} created! Now add equipment to this group.")
         except ValueError as e:
             messagebox.showerror("Error", f"Invalid input: {str(e)}")
     
@@ -360,8 +374,12 @@ def create_group_ui(root):
         update_groups_display()
     
     def add_equipment():
-        """Add equipment to staging area"""
+        """Add equipment to the current staging group"""
         try:
+            # Check if a group has been created
+            if current_staging_group['number'] is None:
+                raise ValueError("Please confirm operational conditions first to create a group")
+            
             equipment_name = equipment_combobox.get()
             if not equipment_name:
                 raise ValueError("Please select an equipment")
@@ -374,16 +392,27 @@ def create_group_ui(root):
             if ea <= 0:
                 raise ValueError("EA must be greater than 0")
             
-            # Add to staging area
-            group_manager.add_staging_equipment(equipment_name, size, ea)
+            # Add equipment directly to the current staging group
+            equipment = FrequencyEquipment(equipment_name, size, ea)
+            
+            # Find the current staging group and add equipment
+            for group in group_manager.groups:
+                if group.group_number == current_staging_group['number']:
+                    group.add_equipment(equipment)
+                    break
+            
+            # Save to cache after adding equipment
+            group_manager.save_to_cache()
             
             # Clear inputs
             equipment_combobox.set('')
             size_combobox.set('')
             ea_spinbox.set('0')
             
-            messagebox.showinfo("Success", f"Added {equipment_name} to staging area")
-            update_staging_display()
+            # Update group specifics display
+            update_group_specifics_for_group(current_staging_group)
+            
+            messagebox.showinfo("Success", f"Added {equipment_name} to Group {current_staging_group['number']}")
         except ValueError as e:
             messagebox.showerror("Error", f"Invalid input: {str(e)}")
     
@@ -470,17 +499,47 @@ def create_group_ui(root):
     group_list_frame.grid_columnconfigure(0, weight=0)
     group_list_frame.grid_columnconfigure(1, weight=1)
 
-    # Add the spinbox section to the left
-    spinbox_label = ttk.Labelframe(group_list_frame, text="Group No.")
+    # Storage for table widget and spinbox (initialize early)
+    table_widget = {'table': None}
+    group_spinbox_widget = {}
+    
+    # Add the spinbox section to the left - select which group to view
+    spinbox_label = ttk.Labelframe(group_list_frame, text="Select Group")
     spinbox_label.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
-    # NOTE: PLACEHOLDER FOR MAX GROUP.
-    # NOTE: In production, this value should be dynamically fetched from the middleware or database.
-    max_group_no = 100
-    # spinbox for group selection to view specifics
-    for i in range(3):
-        spinbox = ttk.Spinbox(spinbox_label, from_=1, to=max_group_no, increment=1, width=10)
-        spinbox.grid(row=i + 1, column=0, sticky="ew", padx=5, pady=5)
+    # Create a spinbox to select which group to view
+    ttk.Label(spinbox_label, text="Group Number:").grid(row=0, column=0, sticky=W, padx=5, pady=(5, 2))
+    
+    def on_group_selection_change():
+        """Called when user changes the spinbox value"""
+        try:
+            selected_group = int(group_select_spinbox.get())
+            # Check if this group exists
+            group_exists = any(g.group_number == selected_group for g in group_manager.groups)
+            if group_exists:
+                # Update the view to show this group
+                temp_group = {'number': selected_group}
+                update_group_specifics_for_group(temp_group)
+        except (ValueError, TypeError):
+            pass
+    
+    group_select_spinbox = ttk.Spinbox(
+        spinbox_label, 
+        from_=1, 
+        to=100, 
+        increment=1, 
+        width=15,
+        command=on_group_selection_change
+    )
+    group_select_spinbox.grid(row=1, column=0, sticky="ew", padx=5, pady=(0, 5))
+    group_select_spinbox.set(1)
+    
+    # Bind to handle manual entry
+    group_select_spinbox.bind('<Return>', lambda e: on_group_selection_change())
+    group_select_spinbox.bind('<FocusOut>', lambda e: on_group_selection_change())
+    
+    # Store spinbox reference
+    group_spinbox_widget['spinbox'] = group_select_spinbox
 
     # # Add the second table section to the right
     # specifics_table = ttk.Treeview(group_list_frame, columns=("Item No.", "Equip. List", "Size", "EA"), show="headings")
@@ -512,22 +571,51 @@ def create_group_ui(root):
         {"text": "EA", "width": 50, "anchor": "center"},
     ]
 
-    # NOTE: Placeholder data for the rows
-    # TODO: Replace by linking with the actual group data stored in memory or db
-    # (memory more likely unless user saves the current group data as CSV or to db)
-    # Would need to think about what storage mechanisms should be implemented (either one or both)
-    rowdata = [
-        (1, 'Centrifugal Compressor', '≥100mm', 5),
-        (2, 'Reciprocating Compressor', '≥50mm', 3),
-        (3, 'Filter', '≥25mm', 10),
-        (4, 'Flange', '≥12.5mm', 20),
-        (5, 'Fin Fan Heat Exchanger', '≥150mm', 2),
-        (6, 'Plate Heat Exchanger', '≥100mm', 4),
-        (7, 'Shell Side Heat Exchanger', '≥250mm', 1),
-        (8, 'Tube Side Heat Exchanger', '≥250mm', 1),
-        (9, 'Pig Trap', '≥100mm', 2),
-        (10, 'Process Pipe', '≥50mm', 15),
-    ]
+    # Initial empty data
+    rowdata = []
+
+    '''INNER FUNCTION: update_group_specifics_for_group() updates the group specifics table'''
+    def update_group_specifics_for_group(group_dict):
+        """Update the group specifics table to show the specified group"""
+        if group_dict['number'] is None:
+            # No group selected, show empty
+            new_rowdata = []
+        else:
+            # Find the specified group
+            current_group = None
+            for group in group_manager.groups:
+                if group.group_number == group_dict['number']:
+                    current_group = group
+                    break
+            
+            if current_group and len(current_group.equipments) > 0:
+                # Build row data from equipment list
+                new_rowdata = []
+                for idx, equip in enumerate(current_group.equipments, 1):
+                    new_rowdata.append((idx, equip.name, equip.size, equip.ea))
+            else:
+                new_rowdata = []
+        
+        # Update the table by accessing the internal treeview
+        if table_widget['table'] is not None:
+            try:
+                # Access the internal treeview
+                tree = table_widget['table'].view
+                # Clear existing rows
+                for item in tree.get_children():
+                    tree.delete(item)
+                # Insert new rows
+                for row in new_rowdata:
+                    tree.insert("", "end", values=row)
+            except AttributeError:
+                # Fallback: try the Tableview methods
+                table_widget['table'].delete_rows()
+                table_widget['table'].load_table_data(new_rowdata)
+        
+        # Update the spinbox if this is the current staging group
+        if 'spinbox' in group_spinbox_widget and group_dict is current_staging_group:
+            if current_staging_group['number'] is not None:
+                group_spinbox_widget['spinbox'].set(current_staging_group['number'])
 
     table = Tableview(
         master=group_list_frame,
@@ -541,6 +629,9 @@ def create_group_ui(root):
         stripecolor=(None, None),
     )
 
+    # Store table reference for updates
+    table_widget['table'] = table
+    
     # Adjust the Tableview to stretch fully within its grid cell
     table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=0, pady=0)
     
@@ -552,6 +643,9 @@ def create_group_ui(root):
             tree.column(col, stretch=True)
     except AttributeError:
         pass  # Fallback if attribute name is different
+    
+    # Initial update of group specifics
+    update_group_specifics_for_group(current_staging_group)
     
     # Prevent scrolling the entire window when interacting with a Combobox
     def disable_scroll(event):

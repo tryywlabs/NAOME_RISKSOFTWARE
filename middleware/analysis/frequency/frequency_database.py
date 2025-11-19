@@ -1,6 +1,15 @@
 """
-Frequency Database Module
-Handles database queries for equipment failure rate data
+FILE: frequency_database.py
+DESCRIPTION:
+    Frequency Database Module
+    Handles database queries for equipment failure rate data
+
+FUNCTIONS:
+    - convert_equipment_name_to_table(equipment_name: str) -> str (Converts the app's equipment name to the matching database table name)
+    - convert_equipment_size_to_db_format(equipment_size: str) -> str (Converts the app's equipment size format to the database's format mm -> A)
+    - get_equipment_failure_rates(equipment_name: str, equipment_size: str) -> list
+    - get_group_failure_rates(group_data: dict) -> dict
+    - calculate_adjusted_failure_rates(failure_rates_data: dict) -> dict
 """
 import sys
 import os
@@ -8,7 +17,6 @@ import os
 # Add database module to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../database'))
 from supabase_connect import supabase
-
 
 def convert_equipment_name_to_table(equipment_name: str) -> str:
     """
