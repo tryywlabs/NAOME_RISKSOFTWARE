@@ -125,8 +125,11 @@ def create_frequency_analysis_ui(root):
                 
                 for category, x_pos in leak_categories.items():
                     if category in data['frequencies']:
-                        x_values.append(x_pos)
-                        y_values.append(data['frequencies'][category]['total'])
+                        freq_value = data['frequencies'][category]['total']
+                        # Only include non-zero values
+                        if freq_value > 0:
+                            x_values.append(x_pos)
+                            y_values.append(freq_value)
                 
                 # Plot the group data
                 if x_values and y_values:
