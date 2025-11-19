@@ -460,7 +460,6 @@ def create_group_ui(root):
                 messagebox.showwarning("Warning", 
                     f"Group {group.group_number} created but failed to save to cache")
             
-            # TODO: Update groups display
             update_staging_display()
         except ValueError as e:
             messagebox.showerror("Error", str(e))
