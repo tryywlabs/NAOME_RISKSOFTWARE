@@ -6,7 +6,7 @@ import os
 import csv
 from collections import defaultdict
 
-from frequency_database import get_equipment_failure_rates, convert_equipment_size_to_db_format
+from frequency_database import get_equipment_failure_rates
 
 
 def load_groups_from_cache(cache_file_path: str = None):

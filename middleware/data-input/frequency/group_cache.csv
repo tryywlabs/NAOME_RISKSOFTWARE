@@ -1,7 +1,9 @@
 Group_Number,Fuel_Phase,Pressure_Bar,Temperature_K,Size_mm,Equipment_Name,Equipment_Size,Equipment_EA
-1,Liquid,1.0,1.0,111.0,2. Reciprocating Compressor,12.5mm,1
-1,Liquid,1.0,1.0,111.0,5. Fin Fan Heat Exchanger,100mm,1
-2,Gas,2.0,2.0,222.0,3. Filter,100mm,3
-2,Gas,2.0,2.0,222.0,7. Shell Side Heat Exchanger,50mm,2
-2,Gas,2.0,2.0,222.0,14. Actuated Valve,125mm,1
-2,Gas,2.0,2.0,222.0,3. Filter,125mm,2
+1,Gas,1.0,1.0,1111.0,1. Centrifugal Compressor,25mm,2
+1,Gas,1.0,1.0,1111.0,7. Shell Side Heat Exchanger,50mm,1
+1,Gas,1.0,1.0,1111.0,8. Tube Side Heat Exchanger,12.5mm,1
+1,Gas,1.0,1.0,1111.0,9. Pig Trap,100mm,2
+1,Gas,1.0,1.0,1111.0,17. Atmospheric Storage Vessel,125mm,1
+2,Liquid,2.0,2.0,222.0,3. Filter,25mm,5
+2,Liquid,2.0,2.0,222.0,1. Centrifugal Compressor,100mm,1
+2,Liquid,2.0,2.0,222.0,9. Pig Trap,125mm,2
