@@ -167,7 +167,7 @@ def create_frequency_analysis_ui(root):
         else:
             ax.set_ylim(1e-6, 1e-1)
         
-        ax.set_xlim(0, 150)
+        ax.set_xlim(0, 200)
         ax.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
         ax.set_facecolor('#f0f0f0')
         

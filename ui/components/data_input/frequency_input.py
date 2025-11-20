@@ -110,13 +110,6 @@ def create_group_ui(root):
             group_manager.groups = []
             group_manager.current_group_number = 1
             
-            # Clear staging area
-            group_manager.staging_equipments = []
-            group_manager.staging_operational_conditions.fuel_phase = None
-            group_manager.staging_operational_conditions.pressure = None
-            group_manager.staging_operational_conditions.temperature = None
-            group_manager.staging_operational_conditions.size = None
-            
             # Delete cache file
             import os
             # Relative cache routing
@@ -261,12 +254,6 @@ def create_group_ui(root):
             pressure = float(pressure_spinbox.get())
             temperature = float(temperature_spinbox.get())
             size = float(size_spinbox.get())
-            
-            # Update staging area
-            group_manager.set_staging_fuel_phase(fuel_phase)
-            group_manager.set_staging_pressure(pressure)
-            group_manager.set_staging_temperature(temperature)
-            group_manager.set_staging_size(size)
             
             # Create a new group immediately with these conditions
             op_conditions = OperationalConditions(fuel_phase, pressure, temperature, size)
@@ -417,13 +404,36 @@ def create_group_ui(root):
             messagebox.showerror("Error", f"Invalid input: {str(e)}")
     
     def remove_equipment():
-        """Remove last equipment from staging area"""
-        if len(group_manager.staging_equipments) > 0:
-            group_manager.remove_staging_equipment(len(group_manager.staging_equipments) - 1)
-            messagebox.showinfo("Success", "Removed last equipment from staging area")
-            update_staging_display()
-        else:
-            messagebox.showwarning("Warning", "No equipment to remove")
+        """Remove last equipment from current staging group"""
+        try:
+            if current_staging_group['number'] is None:
+                raise ValueError("No group selected. Please create a group first.")
+            
+            # Find the current staging group
+            current_group = None
+            for group in group_manager.groups:
+                if group.group_number == current_staging_group['number']:
+                    current_group = group
+                    break
+            
+            if current_group is None:
+                raise ValueError("Current group not found")
+            
+            if len(current_group.equipments) == 0:
+                raise ValueError("No equipment to remove from this group")
+            
+            # Remove last equipment
+            removed = current_group.equipments.pop()
+            
+            # Save to cache
+            group_manager.save_to_cache()
+            
+            # Update display
+            update_group_specifics_for_group(current_staging_group)
+            
+            messagebox.showinfo("Success", f"Removed {removed.name} from Group {current_staging_group['number']}")
+        except ValueError as e:
+            messagebox.showerror("Error", str(e))
     
     # Add/Remove/Confirm buttons column
     ttk.Label(equipment_frame, text="Add").grid(row=0, column=3, sticky=W, padx=5, pady=5)
@@ -439,31 +449,35 @@ def create_group_ui(root):
     add_group_frame.configure(labelwidget=add_group_label)
 
     '''INNER FUNCTION: add_group() validates staging data and adds a new group'''
-    def add_group():
-        """Add group from staging area"""
-        try:
-            if not group_manager.can_add_group():
-                missing = []
-                if not group_manager.staging_operational_conditions.is_complete():
-                    missing.append("operational conditions not complete")
-                if len(group_manager.staging_equipments) == 0:
-                    missing.append("no equipment added")
-                raise ValueError(f"Cannot add group: {', '.join(missing)}")
+    def create_new_group():
+        """Prepare to create a new group by clearing operational conditions"""
+        if current_staging_group['number'] is None:
+            messagebox.showinfo("Info", "Please set operational conditions and click OK to create the first group")
+            return
+        
+        # Check if current group has equipment
+        current_group = next((g for g in group_manager.groups if g.group_number == current_staging_group['number']), None)
+        if current_group and len(current_group.equipments) == 0:
+            messagebox.showwarning("Warning", "Current group has no equipment. Please add equipment before creating a new group.")
+            return
+        
+        result = messagebox.askyesno("Confirm", 
+            f"Current group (Group {current_staging_group['number']}) will be saved. Create a new group?")
+        
+        if result:
+            # Reset current staging group
+            current_staging_group['number'] = None
             
-            group = group_manager.add_group()
+            # Clear operational condition inputs for new group
+            fuel_phase_var.set("Select Fuel Phase")
+            pressure_spinbox.set(0)
+            temperature_spinbox.set(0)
+            size_spinbox.set(0)
             
-            # Save to cache file
-            if group_manager.save_to_cache():
-                messagebox.showinfo("Success", 
-                    f"Group {group.group_number} created with {len(group.equipments)} equipment(s) and saved to cache!")
-            else:
-                messagebox.showwarning("Warning", 
-                    f"Group {group.group_number} created but failed to save to cache")
+            # Update displays
+            update_group_specifics_for_group(current_staging_group)
             
-            # TODO: Update groups display
-            update_staging_display()
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
+            messagebox.showinfo("Success", "Ready to create new group. Please set operational conditions and click OK.")
     
     def finish_groups():
         """Finish creating groups"""
@@ -477,10 +491,10 @@ def create_group_ui(root):
             messagebox.showinfo("Success", "Groups finalized!")
             # TODO: Proceed to next step or save groups
     
-    # Add Group content
+    # Add Group content - Changed to "New Group" to start a fresh group
     add_button_frame = ttk.Frame(add_group_frame)
     add_button_frame.pack(pady=20, fill="both", expand=True)
-    ttk.Button(add_button_frame, text="Add", bootstyle=INFO, width=15, command=add_group).pack(pady=10)
+    ttk.Button(add_button_frame, text="New Group", bootstyle=INFO, width=15, command=create_new_group).pack(pady=10)
     
     finish_label = ttk.Label(add_group_frame, text="Finish", font=bold_font)
     finish_label.pack(pady=(20, 5))

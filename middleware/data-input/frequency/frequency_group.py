@@ -54,8 +54,20 @@ class FrequencyGroup:
         return self.operational_conditions.is_complete() and self.has_equipment()
 
 class FrequencyGroupManager:
-    """Manages multiple frequency groups"""
+    """Manages multiple frequency groups (Singleton)"""
+    _instance = None
+    
+    def __new__(cls, cache_file_path=None):
+        if cls._instance is None:
+            cls._instance = super(FrequencyGroupManager, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+    
     def __init__(self, cache_file_path=None):
+        # Only initialize once
+        if self._initialized:
+            return
+        
         self.groups = []
         self.current_group_number = 1
         # Staging area for current group being created
@@ -71,61 +83,9 @@ class FrequencyGroupManager:
         
         # Load existing groups from cache
         self.load_from_cache()
-    
-    def set_staging_fuel_phase(self, fuel_phase: str):
-        """Set fuel phase in staging area"""
-        self.staging_operational_conditions.fuel_phase = fuel_phase
-    
-    def set_staging_pressure(self, pressure: float):
-        """Set pressure in staging area"""
-        self.staging_operational_conditions.pressure = pressure
-    
-    def set_staging_temperature(self, temperature: float):
-        """Set temperature in staging area"""
-        self.staging_operational_conditions.temperature = temperature
-    
-    def set_staging_size(self, size: float):
-        """Set size in staging area"""
-        self.staging_operational_conditions.size = size
-    
-    def add_staging_equipment(self, name: str, size: str, ea: int):
-        """Add equipment to staging area"""
-        equipment = FrequencyEquipment(name, size, ea)
-        self.staging_equipments.append(equipment)
-        return equipment
-    
-    def remove_staging_equipment(self, index: int):
-        """Remove equipment from staging area by index"""
-        if 0 <= index < len(self.staging_equipments):
-            del self.staging_equipments[index]
-    
-    def clear_staging(self):
-        """Clear the staging area"""
-        self.staging_operational_conditions = OperationalConditions()
-        self.staging_equipments = []
-    
-    def can_add_group(self) -> bool:
-        """Check if staging area is ready to create a group"""
-        return (self.staging_operational_conditions.is_complete() and 
-                len(self.staging_equipments) > 0)
-    
-    def add_group(self) -> FrequencyGroup:
-        """Create group from staging area and add to groups list"""
-        if not self.can_add_group():
-            raise ValueError("Cannot add group: operational conditions incomplete or no equipment added")
         
-        # Create new group with staging data
-        group = FrequencyGroup(self.current_group_number, self.staging_operational_conditions)
-        group.equipments = self.staging_equipments.copy()
-        
-        # Add to groups list
-        self.groups.append(group)
-        self.current_group_number += 1
-        
-        # Clear staging area for next group
-        self.clear_staging()
-        
-        return group
+        # Mark as initialized
+        self._initialized = True
     
     def get_group(self, group_number: int) -> FrequencyGroup:
         """Get group by group number"""
