@@ -502,6 +502,24 @@ def create_group_ui(root):
     finish_button_frame = ttk.Frame(add_group_frame)
     finish_button_frame.pack(pady=10, fill="both", expand=True)
     ttk.Button(finish_button_frame, text="STOP", bootstyle=DANGER, width=15, command=finish_groups).pack(pady=10)
+    
+    # Generate Analysis button
+    ttk.Label(add_group_frame, text="Analysis", font=bold_font).pack(pady=(20, 5))
+    analysis_button_frame = ttk.Frame(add_group_frame)
+    analysis_button_frame.pack(pady=10, fill="both", expand=True)
+    
+    # This will be set by main.py to connect to the frequency_analysis refresh function
+    generate_analysis_callback = {'function': None}
+    
+    def generate_analysis():
+        """Trigger frequency analysis generation"""
+        if generate_analysis_callback['function'] is not None:
+            generate_analysis_callback['function']()
+            messagebox.showinfo("Success", "Frequency analysis generated!")
+        else:
+            messagebox.showwarning("Warning", "Analysis function not connected")
+    
+    ttk.Button(analysis_button_frame, text="Generate Analysis", bootstyle=SUCCESS, width=15, command=generate_analysis).pack(pady=10)
 
     # Group List
     group_list_frame = ttk.LabelFrame(main_frame, text="Group Specifics", padding=10)
@@ -554,28 +572,6 @@ def create_group_ui(root):
     
     # Store spinbox reference
     group_spinbox_widget['spinbox'] = group_select_spinbox
-
-    # # Add the second table section to the right
-    # specifics_table = ttk.Treeview(group_list_frame, columns=("Item No.", "Equip. List", "Size", "EA"), show="headings")
-    # specifics_table.heading("Item No.", text="Item No.")
-    # specifics_table.heading("Equip. List", text="Equip. List")
-    # specifics_table.heading("Size", text="Size")
-    # specifics_table.heading("EA", text="EA")
-
-    # specifics_table.column("Item No.", width=100, anchor="center")
-    # specifics_table.column("Equip. List", width=150, anchor="center")
-    # specifics_table.column("Size", width=100, anchor="center")
-    # specifics_table.column("EA", width=100, anchor="center")
-
-    # specifics_table.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)
-
-    # # Embed the spinbox inside the 0th column of the Treeview in the second table
-    # for i in range(3):
-    #     item_id = specifics_table.insert("", "end", values=("", "Equip. List", "Size", "EA"))
-    #     bbox = specifics_table.bbox(item_id, column="Item No.")
-    #     if bbox:  # Ensure the bounding box is valid
-    #         spinbox = ttk.Spinbox(group_list_frame, from_=0, to=100, increment=1, width=5)
-    #         spinbox.place(x=bbox[0] + specifics_table.winfo_rootx(), y=bbox[1] + specifics_table.winfo_rooty(), width=bbox[2], height=bbox[3])
 
     # Using Tableview for better functionality
     coldata = [
@@ -692,6 +688,9 @@ def create_group_ui(root):
         root.focus_set()
 
     canvas.bind("<Button-1>", clear_focus)
+    
+    # Return the callback dictionary so main.py can connect it to frequency_analysis
+    return generate_analysis_callback
 
 if __name__ == "__main__":
     root = tb.Window(themename="pulse")
