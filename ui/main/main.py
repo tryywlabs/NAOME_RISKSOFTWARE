@@ -155,7 +155,7 @@ def build(root, style=None):
     # Replace placeholder content in the Frequency Data tab with the frame from frequency_data.py
     for widget in freq.winfo_children():
         widget.destroy()  # Clear placeholder content
-    create_group_ui(freq)
+    generate_analysis_callback = create_group_ui(freq)
 
     lbl3 = tb.Label(cons, text='Consequence Data area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(cons, text='Consequence Data area — add widgets here', anchor='center')
     lbl3.pack(fill='both', expand=True, padx=12, pady=12)
@@ -163,8 +163,12 @@ def build(root, style=None):
     lbl4 = tb.Label(safety, text='Safety system & Human factor area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(safety, text='Safety system & Human factor area — add widgets here', anchor='center')
     lbl4.pack(fill='both', expand=True, padx=12, pady=12)
 
-    # Add frequency analysis UI to Frequency Analysis tab
-    create_frequency_analysis_ui(freq_analysis)
+    # Add frequency analysis UI to Frequency Analysis tab and get refresh function
+    freq_analysis_frame, refresh_analysis = create_frequency_analysis_ui(freq_analysis)
+    
+    # Connect the Generate Analysis button in frequency_input to the refresh function
+    if generate_analysis_callback is not None:
+        generate_analysis_callback['function'] = refresh_analysis
     
     # Add placeholder content for other analysis tabs
     lbl_cons_analysis = tb.Label(cons_analysis, text='Consequence Analysis area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(cons_analysis, text='Consequence Analysis area — add widgets here', anchor='center')

@@ -312,28 +312,15 @@ def create_frequency_analysis_ui(root):
     # Initial load
     group_frequencies = load_frequency_data()
     
-    # Configure grid - add row for refresh button
+    # Configure grid
     main_frame.grid_columnconfigure(0, weight=3)
     main_frame.grid_columnconfigure(1, weight=1)
-    main_frame.grid_rowconfigure(0, weight=0)  # Refresh button row
-    main_frame.grid_rowconfigure(1, weight=3)  # Graph row
-    main_frame.grid_rowconfigure(2, weight=1)  # Table row
-    
-    # Add refresh button at the top
-    button_frame = ttk.Frame(main_frame)
-    button_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
-    
-    refresh_btn = tb.Button(
-        button_frame,
-        text="🔄 Refresh Analysis",
-        bootstyle="success",
-        command=refresh_analysis
-    )
-    refresh_btn.pack(side="right", padx=5)
+    main_frame.grid_rowconfigure(0, weight=3)  # Graph row
+    main_frame.grid_rowconfigure(1, weight=1)  # Table row
     
     # Create the graph frame (top left)
     graph_frame = ttk.LabelFrame(main_frame, text="Frequency Analysis Graph", padding=10)
-    graph_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+    graph_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
     
     # Create matplotlib figure
     fig = Figure(figsize=(6, 4), dpi=100)
@@ -353,15 +340,15 @@ def create_frequency_analysis_ui(root):
     
     # Create legend frame (top right)
     legend_frame = ttk.LabelFrame(main_frame, text="Sub Groups", padding=10)
-    legend_frame.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
+    legend_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
     legend_widgets['frame'] = legend_frame
     
     # Initial legend rendering
     update_legend(group_frequencies)
     
-    # Create data table frame (bottom left)
+    # Create data table frame (bottom)
     table_frame = ttk.LabelFrame(main_frame, text="Frequency Data Table", padding=10)
-    table_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
+    table_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
     
     # Create Treeview for the table
     columns = ("Group", "1-3mm", "3-10mm", "10-50mm", "50-150mm", ">150mm", "Total")
@@ -389,7 +376,8 @@ def create_frequency_analysis_ui(root):
     # Initial table rendering
     update_table(group_frequencies)
     
-    return main_frame
+    # Return both the frame and the refresh function
+    return main_frame, refresh_analysis
 
 
 if __name__ == "__main__":
