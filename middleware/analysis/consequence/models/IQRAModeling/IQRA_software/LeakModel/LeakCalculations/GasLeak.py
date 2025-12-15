@@ -17,6 +17,13 @@ def calculate_Qg():
     except ValueError:
         messagebox.showerror("Invalid input", "숫자를 정확하게 입력하세요!")
 
+
+
+'''
+Unnecessary code, separate UI component not needed
+TODO (15/12/25): Delete when UI has been integrated in the main app
+'''
+
 # Tkinter UI 설정
 root = tk.Tk()
 root.title("Gas Flow Rate Calculator")
