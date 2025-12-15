@@ -2,7 +2,10 @@ import tkinter as tk
 from tkinter import messagebox
 import math
 
-# 함수: R_E 계산
+'''
+FUNCTION: calculate_RE():
+DESCRIPTION: Calculate the release rate (R_E) and expected outflow (Q_B) based on user inputs.
+'''
 def calculate_RE():
     try:
         # 입력값 가져오기
