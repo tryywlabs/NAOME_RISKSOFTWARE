@@ -2,3 +2,6 @@ Group_Number,Fuel_Phase,Pressure_Bar,Temperature_K,Size_mm,Equipment_Name,Equipm
 1,Gas,1.0,1.0,1.0,10. Process Pipe,250mm,2
 1,Gas,1.0,1.0,1.0,4. Flange,100mm,2
 1,Gas,1.0,1.0,1.0,8. Tube Side Heat Exchanger,12.5mm,4
+
+
+
