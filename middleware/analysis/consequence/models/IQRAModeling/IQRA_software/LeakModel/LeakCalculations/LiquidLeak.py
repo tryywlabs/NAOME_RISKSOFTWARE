@@ -1,50 +1,15 @@
-import math #sqrt calculation
+"""Liquid leak calculation utilities (UI-free)."""
+import math
 
-class liquidLeakCalculator:
+from PhaseModule import PhaseModule
 
-    def __init__(self):
-        pass
 
-    def calculate_QL(self, entry_d, entry_rho_L, entry_P_L):
-        # 입력값 가져오기
-        d = float(entry_d.get())  # 구멍 직경 (mm)
-        rho_L = float(entry_rho_L.get())  # 액체 밀도 (kg/m³)
-        P_L_Pa = float(entry_P_L.get())  # 초기 압력 (bar gauge)
+class LiquidLeakCalculator(PhaseModule):
+    """Calculates initial liquid leak rate (kg/s)."""
 
-        # 수식 적용: QL = 2.1 * 10^-4 * d^2 * sqrt(rho_L * P_L)
-        # NOTE: What's this for...
-        Q_L = 2.1 * 10**-4 * d**2 * math.sqrt(rho_L * P_L_Pa)
-        return Q_L
+    def calculate_leak(self, diameter_mm: float, liquid_density: float, pressure_bar_g: float) -> float:
+        """Compute Q_L using hole diameter (mm), density (kg/m^3), and gauge pressure (bar).
 
-'''
-Unnecessary code, separate UI component not needed
-TODO (15/12/25): Delete when UI has been integrated in the main app
-'''
-
-# # Tkinter UI 설정
-# root = tk.Tk()
-# root.title("Liquid Flow Rate Calculator")
-
-# # 입력 레이블 및 입력 필드
-# tk.Label(root, text="d (구멍 직경, mm):").grid(row=0, column=0, padx=10, pady=5)
-# entry_d = tk.Entry(root)
-# entry_d.grid(row=0, column=1, padx=10, pady=5)
-
-# tk.Label(root, text="ρ_L (액체 밀도, kg/m³):").grid(row=1, column=0, padx=10, pady=5)
-# entry_rho_L = tk.Entry(root)
-# entry_rho_L.grid(row=1, column=1, padx=10, pady=5)
-
-# tk.Label(root, text="P_L (압력, bar):").grid(row=2, column=0, padx=10, pady=5)
-# entry_P_L = tk.Entry(root)
-# entry_P_L.grid(row=2, column=1, padx=10, pady=5)
-
-# # 결과 표시 라벨
-# result_label = tk.Label(root, text="Q_L = ? kg/s", font=("Arial", 12, "bold"))
-# result_label.grid(row=4, column=0, columnspan=2, pady=10)
-
-# # 계산 버튼
-# calculate_button = tk.Button(root, text="Calculate", command=calculate_QL)
-# calculate_button.grid(row=3, column=0, columnspan=2, pady=10)
-
-# # 메인 루프 실행
-# root.mainloop()
+        Formula: Q_L = 2.1e-4 * d^2 * sqrt(rho_L * P_L)
+        """
+        return 2.1e-4 * diameter_mm ** 2 * math.sqrt(liquid_density * pressure_bar_g)

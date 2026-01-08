@@ -53,6 +53,21 @@ class FrequencyGroup:
         """Check if group is valid (has complete conditions and at least one equipment)"""
         return self.operational_conditions.is_complete() and self.has_equipment()
 
+    def to_group_data(self) -> dict:
+        """Convert group data to a dict compatible with analysis modules."""
+        return {
+            "operational_conditions": {
+                "fuel_phase": self.operational_conditions.fuel_phase,
+                "pressure": self.operational_conditions.pressure,
+                "temperature": self.operational_conditions.temperature,
+                "size": self.operational_conditions.size,
+            },
+            "equipments": [
+                {"name": eq.name, "size": eq.size, "ea": eq.ea}
+                for eq in self.equipments
+            ],
+        }
+
 class FrequencyGroupManager:
     """Manages multiple frequency groups (Singleton)"""
     _instance = None
@@ -97,6 +112,10 @@ class FrequencyGroupManager:
     def get_all_groups(self) -> list:
         """Get all groups"""
         return self.groups
+
+    def get_all_group_data(self) -> dict:
+        """Return a dict of group_number -> data for analysis."""
+        return {group.group_number: group.to_group_data() for group in self.groups}
     
     def save_to_cache(self):
         """Save all groups to CSV cache file"""
