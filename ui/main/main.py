@@ -39,8 +39,11 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/data_input')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/analysis/frequency')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../components/analysis/consequence')))
 from frequency_input import create_group_ui
 from frequency_analysis import create_frequency_analysis_ui
+from consequence_input import create_consequence_input_ui
+from consequence_analysis import create_consequence_analysis_ui
 
 '''build(root, style=None): FUNCTION'''
 
@@ -157,8 +160,9 @@ def build(root, style=None):
         widget.destroy()  # Clear placeholder content
     generate_analysis_callback = create_group_ui(freq)
 
-    lbl3 = tb.Label(cons, text='Consequence Data area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(cons, text='Consequence Data area — add widgets here', anchor='center')
-    lbl3.pack(fill='both', expand=True, padx=12, pady=12)
+    for widget in cons.winfo_children():
+        widget.destroy()
+    create_consequence_input_ui(cons)
 
     lbl4 = tb.Label(safety, text='Safety system & Human factor area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(safety, text='Safety system & Human factor area — add widgets here', anchor='center')
     lbl4.pack(fill='both', expand=True, padx=12, pady=12)
@@ -171,8 +175,9 @@ def build(root, style=None):
         generate_analysis_callback['function'] = refresh_analysis
     
     # Add placeholder content for other analysis tabs
-    lbl_cons_analysis = tb.Label(cons_analysis, text='Consequence Analysis area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(cons_analysis, text='Consequence Analysis area — add widgets here', anchor='center')
-    lbl_cons_analysis.pack(fill='both', expand=True, padx=12, pady=12)
+    for widget in cons_analysis.winfo_children():
+        widget.destroy()
+    create_consequence_analysis_ui(cons_analysis)
     
     lbl_risk = tb.Label(risk_assessment, text='Risk Assessment area — add widgets here', anchor='center') if TB_AVAILABLE else ttk.Label(risk_assessment, text='Risk Assessment area — add widgets here', anchor='center')
     lbl_risk.pack(fill='both', expand=True, padx=12, pady=12)

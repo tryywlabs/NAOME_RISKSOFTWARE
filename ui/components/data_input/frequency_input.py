@@ -98,7 +98,13 @@ def create_group_ui(root):
     # The CSV file is effectively acting as a simple cache, where it is created if not exists & updated when a group is added
     # The CSV file is deleted when "Reset" is clicked
     ttk.Label(controls_frame, text="Save Groups").pack(anchor=W, pady=(5, 5))
-    ttk.Button(controls_frame, text="Save", bootstyle=INFO, width=15).pack(fill=X, pady=(0, 15))
+    def save_groups():
+        """Persist current groups to the CSV cache (optional)."""
+        if group_manager.save_to_cache():
+            messagebox.showinfo("Success", "Groups saved to cache.")
+        else:
+            messagebox.showerror("Error", "Failed to save groups to cache.")
+    ttk.Button(controls_frame, text="Save", bootstyle=INFO, width=15, command=save_groups).pack(fill=X, pady=(0, 15))
     
     '''FUNCTION: reset_groups() wipes the group cache and staging area'''
     def reset_groups():
@@ -111,9 +117,7 @@ def create_group_ui(root):
             group_manager.current_group_number = 1
             
             # Delete cache file
-            import os
-            # Relative cache routing
-            cache_file = os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency/group_cache.csv')
+            cache_file = group_manager.cache_file_path
             if os.path.exists(cache_file):
                 os.remove(cache_file)
             
@@ -388,9 +392,6 @@ def create_group_ui(root):
                     group.add_equipment(equipment)
                     break
             
-            # Save to cache after adding equipment
-            group_manager.save_to_cache()
-            
             # Clear inputs
             equipment_combobox.set('')
             size_combobox.set('')
@@ -424,9 +425,6 @@ def create_group_ui(root):
             
             # Remove last equipment
             removed = current_group.equipments.pop()
-            
-            # Save to cache
-            group_manager.save_to_cache()
             
             # Update display
             update_group_specifics_for_group(current_staging_group)
@@ -495,6 +493,7 @@ def create_group_ui(root):
     add_button_frame = ttk.Frame(add_group_frame)
     add_button_frame.pack(pady=20, fill="both", expand=True)
     ttk.Button(add_button_frame, text="New Group", bootstyle=INFO, width=15, command=create_new_group).pack(pady=10)
+    ttk.Button(add_button_frame, text="Save Groups", bootstyle=PRIMARY, width=15, command=save_groups).pack(pady=10)
     
     finish_label = ttk.Label(add_group_frame, text="Finish", font=bold_font)
     finish_label.pack(pady=(20, 5))

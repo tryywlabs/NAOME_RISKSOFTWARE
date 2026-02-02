@@ -31,6 +31,11 @@ freq_analysis_path = os.path.join(project_root, 'middleware/analysis/frequency')
 if freq_analysis_path not in sys.path:
     sys.path.insert(0, freq_analysis_path)
 
+# Add frequency data-input path (needed for in-memory group access)
+freq_input_path = os.path.join(project_root, 'middleware/data-input/frequency')
+if freq_input_path not in sys.path:
+    sys.path.insert(0, freq_input_path)
+
 # Add database path (needed for supabase_connect import)
 db_path = os.path.join(project_root, 'database')
 if db_path not in sys.path:
@@ -56,6 +61,11 @@ except Exception as e:
     def calculate_all_group_frequencies():
         return {}
 
+try:
+    from frequency_group import FrequencyGroupManager
+except Exception:
+    FrequencyGroupManager = None
+
 '''FUNCTION: create_frequency_analysis_ui(root)'''
 def create_frequency_analysis_ui(root):
     """Create the frequency analysis UI in the provided root window."""
@@ -73,7 +83,11 @@ def create_frequency_analysis_ui(root):
         """Load frequency calculation results"""
         try:
             print("Attempting to load frequency data...")
-            frequencies = calculate_all_group_frequencies()
+            if FrequencyGroupManager is not None:
+                group_manager = FrequencyGroupManager()
+                frequencies = calculate_all_group_frequencies(group_manager=group_manager)
+            else:
+                frequencies = calculate_all_group_frequencies()
             print(f"Loaded {len(frequencies)} groups")
             if frequencies:
                 for group_num, data in frequencies.items():
@@ -98,10 +112,10 @@ def create_frequency_analysis_ui(root):
         
         # Define leak size categories and their midpoints for plotting
         leak_categories = {
-            '1-3mm': 2.0,
-            '3-10mm': 6.5,
-            '10-50mm': 30.0,
-            '50-150mm': 100.0,
+            '1-3mm': 3.0,
+            '3-10mm': 10.0,
+            '10-50mm': 50.0,
+            '50-150mm': 150.0,
             '>150mm': 175.0
         }
         

@@ -3,10 +3,59 @@ Frequency Calculation Module
 Calculates total frequencies for each group by aggregating equipment failure rates
 """
 import os
+import sys
 import csv
+from dataclasses import dataclass
+from typing import Dict, Any, Optional, List
 from collections import defaultdict
 
 from frequency_database import get_equipment_failure_rates
+
+# Leak adapter import (used only when enriching with leak profiles)
+_LEAK_ADAPTER_PATH = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "../consequence/models/IQRAModeling/IQRA_software/LeakModel/LeakCalculations",
+    )
+)
+if _LEAK_ADAPTER_PATH not in sys.path:
+    sys.path.insert(0, _LEAK_ADAPTER_PATH)
+try:
+    from leak_scenario_adapter import attach_leak_profiles, DEFAULT_HOLE_DIAMETERS_MM as ADAPTER_DEFAULT_HOLES
+except Exception:
+    attach_leak_profiles = None
+    ADAPTER_DEFAULT_HOLES = None
+
+
+_FALLBACK_HOLE_MAP = {
+    "1-3mm": 3.0,
+    "3-10mm": 10.0,
+    "10-50mm": 50.0,
+    "50-150mm": 150.0,
+    ">150mm": 175.0,
+}
+
+
+@dataclass
+class LeakScenario:
+    """Represents a single leak size scenario for a group."""
+
+    category: str
+    hole_diameter_mm: Optional[float]
+    frequency_total: float
+    frequency_full_pressure: float
+    frequency_zero_pressure: float
+    leak_rate_kg_s: Optional[float] = None
+
+
+@dataclass
+class GroupScenarioSet:
+    """Holds all leak-size scenarios for a group."""
+
+    group_number: int
+    operational_conditions: Dict[str, Any]
+    equipments: List[Dict[str, Any]]
+    scenarios: List[LeakScenario]
 
 
 def load_groups_from_cache(cache_file_path: str = None):
@@ -73,6 +122,17 @@ def load_groups_from_cache(cache_file_path: str = None):
     return dict(groups)
 
 
+def load_groups_from_manager(group_manager) -> dict:
+    """Load group data from an in-memory FrequencyGroupManager."""
+    if group_manager is None:
+        return {}
+    try:
+        group_data = group_manager.get_all_group_data()
+        return dict(group_data)
+    except Exception:
+        return {}
+
+
 def calculate_group_frequencies(group_data: dict):
     """
     Calculate total frequencies for a single group by summing all equipment failure rates
@@ -124,7 +184,11 @@ def calculate_group_frequencies(group_data: dict):
     return dict(aggregated_rates)
 
 
-def calculate_all_group_frequencies(cache_file_path: str = None):
+def calculate_all_group_frequencies(
+    cache_file_path: str = None,
+    group_manager=None,
+    groups: Optional[Dict[int, Dict[str, Any]]] = None,
+):
     """
     Calculate frequencies for all groups in the cache
     
@@ -149,8 +213,11 @@ def calculate_all_group_frequencies(cache_file_path: str = None):
             ...
         }
     """
-    # Load all groups
-    groups = load_groups_from_cache(cache_file_path)
+    # Load all groups: prefer in-memory objects when provided.
+    if groups is None:
+        groups = load_groups_from_manager(group_manager)
+    if not groups:
+        groups = load_groups_from_cache(cache_file_path)
     
     # Calculate frequencies for each group
     results = {}
@@ -163,6 +230,101 @@ def calculate_all_group_frequencies(cache_file_path: str = None):
         }
     
     return results
+
+
+def calculate_all_group_frequencies_with_leaks(
+    cache_file_path: str = None,
+    density_overrides: dict | None = None,
+    hole_diameters_mm: dict | None = None,
+):
+    """Calculate frequencies and attach leak profiles per leak-size bin.
+
+    Returns the same structure as calculate_all_group_frequencies but with an
+    additional `leak_profiles` key per group. If the leak adapter is unavailable,
+    this raises RuntimeError to make the failure obvious to callers.
+    """
+    base = calculate_all_group_frequencies(cache_file_path)
+
+    if attach_leak_profiles is None:
+        raise RuntimeError("leak_scenario_adapter is not available on PYTHONPATH")
+
+    return attach_leak_profiles(
+        base,
+        density_overrides=density_overrides,
+        hole_diameters_mm=hole_diameters_mm,
+    )
+
+
+def _resolve_hole_map(custom_map: Optional[Dict[str, float]]) -> Dict[str, float]:
+    base = dict(ADAPTER_DEFAULT_HOLES) if ADAPTER_DEFAULT_HOLES else dict(_FALLBACK_HOLE_MAP)
+    if custom_map:
+        base.update({k: float(v) for k, v in custom_map.items()})
+    return base
+
+
+def build_group_scenarios(
+    group_results: Dict[int, Dict[str, Any]],
+    hole_diameters_mm: Optional[Dict[str, float]] = None,
+) -> Dict[int, GroupScenarioSet]:
+    """Convert raw frequency (and optional leak profile) data into scenario objects."""
+    hole_map = _resolve_hole_map(hole_diameters_mm)
+    out: Dict[int, GroupScenarioSet] = {}
+
+    for group_num, group_data in group_results.items():
+        freqs = group_data.get("frequencies", {})
+        leak_profiles = group_data.get("leak_profiles", {}).get("categories", {}) if group_data.get("leak_profiles") else {}
+
+        scenarios: List[LeakScenario] = []
+        for category, rates in freqs.items():
+            if category == "Total":
+                continue
+            hole_d = hole_map.get(category)
+            leak_rate = None
+            if category in leak_profiles:
+                leak_rate = leak_profiles[category].get("leak_rate_kg_s")
+
+            scenarios.append(
+                LeakScenario(
+                    category=category,
+                    hole_diameter_mm=hole_d,
+                    frequency_total=float(rates.get("total", 0.0)),
+                    frequency_full_pressure=float(rates.get("full_pressure", 0.0)),
+                    frequency_zero_pressure=float(rates.get("zero_pressure", 0.0)),
+                    leak_rate_kg_s=leak_rate,
+                )
+            )
+
+        out[group_num] = GroupScenarioSet(
+            group_number=group_num,
+            operational_conditions=group_data.get("operational_conditions", {}),
+            equipments=group_data.get("equipments", []),
+            scenarios=scenarios,
+        )
+
+    return out
+
+
+def calculate_group_scenarios(
+    cache_file_path: str = None,
+    hole_diameters_mm: Optional[Dict[str, float]] = None,
+) -> Dict[int, GroupScenarioSet]:
+    """Return object model of groups with 5 leak-size scenarios each (no leak rates)."""
+    base = calculate_all_group_frequencies(cache_file_path)
+    return build_group_scenarios(base, hole_diameters_mm=hole_diameters_mm)
+
+
+def calculate_group_scenarios_with_leaks(
+    cache_file_path: str = None,
+    density_overrides: dict | None = None,
+    hole_diameters_mm: dict | None = None,
+) -> Dict[int, GroupScenarioSet]:
+    """Return object model with leak rates attached (via leak_scenario_adapter)."""
+    enriched = calculate_all_group_frequencies_with_leaks(
+        cache_file_path=cache_file_path,
+        density_overrides=density_overrides,
+        hole_diameters_mm=hole_diameters_mm,
+    )
+    return build_group_scenarios(enriched, hole_diameters_mm=hole_diameters_mm)
 
 
 def get_frequency_summary(group_frequencies: dict):

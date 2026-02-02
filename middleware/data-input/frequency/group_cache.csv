@@ -1,4 +1,12 @@
 Group_Number,Fuel_Phase,Pressure_Bar,Temperature_K,Size_mm,Equipment_Name,Equipment_Size,Equipment_EA
-1,Gas,1.0,1.0,1.0,10. Process Pipe,250mm,2
-1,Gas,1.0,1.0,1.0,4. Flange,100mm,2
-1,Gas,1.0,1.0,1.0,8. Tube Side Heat Exchanger,12.5mm,4
+1,Gas,350.0,22.0,25.0,14. Actuated Valve,25mm,1
+1,Gas,350.0,22.0,25.0,15. Manual Valve,25mm,1
+1,Gas,350.0,22.0,25.0,3. Filter,25mm,1
+1,Gas,350.0,22.0,25.0,14. Actuated Valve,25mm,1
+1,Gas,350.0,22.0,25.0,14. Actuated Valve,25mm,4
+1,Gas,350.0,22.0,25.0,3. Filter,25mm,4
+1,Gas,350.0,22.0,25.0,15. Manual Valve,25mm,4
+1,Gas,350.0,22.0,25.0,15. Manual Valve,25mm,4
+1,Gas,350.0,22.0,25.0,16. Process Vessel,25mm,4
+1,Gas,350.0,22.0,25.0,4. Flange,25mm,48
+1,Gas,350.0,22.0,25.0,13. Small Bore Fitting,12.5mm,3

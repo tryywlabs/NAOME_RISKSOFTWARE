@@ -32,6 +32,8 @@ def sigma_yz(x, stability_class):
 
 def gaussian_plume(Qevp, u_wind, H_E, x, y, z, stability_class):
     """Calculate Gaussian plume concentration C(x,y,z;H_E)"""
+    if x <= 0 or u_wind <= 0:
+        return 0.0, 0.0, 0.0
     sigma_y, sigma_z = sigma_yz(x, stability_class)
     term1 = Qevp / (2 * np.pi * u_wind * sigma_y * sigma_z)
     term2 = np.exp(-y**2 / (2 * sigma_y**2))
