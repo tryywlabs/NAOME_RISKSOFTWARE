@@ -92,7 +92,10 @@ class FrequencyGroupManager:
         # Set cache file path
         if cache_file_path is None:
             # Default to group_cache.csv in the same directory
-            self.cache_file_path = os.path.join(os.path.dirname(__file__), 'group_cache.csv')
+            self.cache_file_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "group_cache.csv",
+            )
         else:
             self.cache_file_path = cache_file_path
         
@@ -120,6 +123,7 @@ class FrequencyGroupManager:
     def save_to_cache(self):
         """Save all groups to CSV cache file"""
         try:
+            os.makedirs(os.path.dirname(self.cache_file_path), exist_ok=True)
             with open(self.cache_file_path, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 

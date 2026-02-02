@@ -32,6 +32,8 @@ def sigma_yz(x, stability_class):
 
 def gaussian_plume(Qevp, u_wind, H_E, x, y, z, stability_class):
     """Calculate Gaussian plume concentration C(x,y,z;H_E)"""
+    if x <= 0 or u_wind <= 0:
+        return 0.0, 0.0, 0.0
     sigma_y, sigma_z = sigma_yz(x, stability_class)
     term1 = Qevp / (2 * np.pi * u_wind * sigma_y * sigma_z)
     term2 = np.exp(-y**2 / (2 * sigma_y**2))
@@ -44,87 +46,87 @@ def gaussian_plume(Qevp, u_wind, H_E, x, y, z, stability_class):
 # -----------------------------
 # Tkinter GUI
 # -----------------------------
-# def calculate_concentration():
-#     try:
-#         Qevp = float(entry_Qevp.get())
-#         u_wind = float(entry_u.get())
-#         H_E = float(entry_H.get())
-#         x = float(entry_x.get())
-#         y = float(entry_y.get())
-#         z = float(entry_z.get())
-#         stability_class = combo_class.get().upper()
+def calculate_concentration():
+    try:
+        Qevp = float(entry_Qevp.get())
+        u_wind = float(entry_u.get())
+        H_E = float(entry_H.get())
+        x = float(entry_x.get())
+        y = float(entry_y.get())
+        z = float(entry_z.get())
+        stability_class = combo_class.get().upper()
 
-#         C, sigma_y, sigma_z = gaussian_plume(Qevp, u_wind, H_E, x, y, z, stability_class)
+        C, sigma_y, sigma_z = gaussian_plume(Qevp, u_wind, H_E, x, y, z, stability_class)
 
-#         # 결과 테이블 초기화
-#         for row in tree.get_children():
-#             tree.delete(row)
+        # 결과 테이블 초기화
+        for row in tree.get_children():
+            tree.delete(row)
 
-#         # 결과 추가
-#         tree.insert("", "end", values=(
-#             f"{x:.1f} m",
-#             f"{sigma_y:.2f}",
-#             f"{sigma_y:.2f}",  # σx = σy 가정
-#             f"{sigma_z:.2f}",
-#             f"{C:.6e}"
-#         ))
+        # 결과 추가
+        tree.insert("", "end", values=(
+            f"{x:.1f} m",
+            f"{sigma_y:.2f}",
+            f"{sigma_y:.2f}",  # σx = σy 가정
+            f"{sigma_z:.2f}",
+            f"{C:.6e}"
+        ))
 
-#     except Exception as e:
-#         messagebox.showerror("Error", f"Invalid input: {e}")
+    except Exception as e:
+        messagebox.showerror("Error", f"Invalid input: {e}")
 
 
-# # -----------------------------
-# # Window layout
-# # -----------------------------
-# root = tk.Tk()
-# root.title("Gaussian Plume Model Calculator")
-# root.geometry("680x440")
-# root.resizable(False, False)
+# -----------------------------
+# Window layout
+# -----------------------------
+root = tk.Tk()
+root.title("Gaussian Plume Model Calculator")
+root.geometry("680x440")
+root.resizable(False, False)
 
-# frame = ttk.Frame(root, padding=15)
-# frame.pack(fill="both", expand=True)
+frame = ttk.Frame(root, padding=15)
+frame.pack(fill="both", expand=True)
 
-# # Input labels and entries (t 제거)
-# labels = ["M (kg)", "u (m/s)", "H (m)", "x (m)", "y (m)", "z (m)", "Stability (A–F)"]
-# entries = {}
+# Input labels and entries (t 제거)
+labels = ["M (kg)", "u (m/s)", "H (m)", "x (m)", "y (m)", "z (m)", "Stability (A–F)"]
+entries = {}
 
-# for i, text in enumerate(labels[:-1]):
-#     ttk.Label(frame, text=text).grid(row=i, column=0, sticky="w", pady=3)
-#     e = ttk.Entry(frame)
-#     e.grid(row=i, column=1, pady=3)
-#     entries[text] = e
+for i, text in enumerate(labels[:-1]):
+    ttk.Label(frame, text=text).grid(row=i, column=0, sticky="w", pady=3)
+    e = ttk.Entry(frame)
+    e.grid(row=i, column=1, pady=3)
+    entries[text] = e
 
-# # Stability class dropdown
-# ttk.Label(frame, text=labels[-1]).grid(row=6, column=0, sticky="w", pady=3)
-# combo_class = ttk.Combobox(frame, values=["A", "B", "C", "D", "E", "F"], width=5)
-# combo_class.grid(row=6, column=1)
-# combo_class.current(0)
+# Stability class dropdown
+ttk.Label(frame, text=labels[-1]).grid(row=6, column=0, sticky="w", pady=3)
+combo_class = ttk.Combobox(frame, values=["A", "B", "C", "D", "E", "F"], width=5)
+combo_class.grid(row=6, column=1)
+combo_class.current(0)
 
-# # Assign entries
-# entry_Qevp = entries["M (kg)"]
-# entry_u = entries["u (m/s)"]
-# entry_H = entries["H (m)"]
-# entry_x = entries["x (m)"]
-# entry_y = entries["y (m)"]
-# entry_z = entries["z (m)"]
+# Assign entries
+entry_Qevp = entries["M (kg)"]
+entry_u = entries["u (m/s)"]
+entry_H = entries["H (m)"]
+entry_x = entries["x (m)"]
+entry_y = entries["y (m)"]
+entry_z = entries["z (m)"]
 
-# # Default values
-# entry_Qevp.insert(0, "1000")
-# entry_u.insert(0, "1")
-# entry_H.insert(0, "0")
-# entry_x.insert(0, "10")
-# entry_y.insert(0, "0")
-# entry_z.insert(0, "0")
+# Default values
+entry_Qevp.insert(0, "1000")
+entry_u.insert(0, "1")
+entry_H.insert(0, "0")
+entry_x.insert(0, "10")
+entry_y.insert(0, "0")
+entry_z.insert(0, "0")
 
-# # Calculate button
-# ttk.Button(frame, text="계산하기", command=calculate_concentration).grid(row=7, column=0, columnspan=2, pady=10)
+# Calculate button
+ttk.Button(frame, text="계산하기", command=calculate_concentration).grid(row=7, column=0, columnspan=2, pady=10)
 
-# # Result table (Treeview)
-# columns = ("x", "σx", "σy", "σz", "C")
-# tree = ttk.Treeview(frame, columns=columns, show="headings", height=3)
-# for col, w in zip(columns, [80, 80, 80, 80, 180]):
-#     tree.heading(col, text=col)
-#     tree.column(col, width=w, anchor="center")
-# tree.grid(row=8, column=0, columnspan=2, pady=10)
+# Result table (Treeview)
+columns = ("x", "σx", "σy", "σz", "C")
+tree = ttk.Treeview(frame, columns=columns, show="headings", height=3)
+for col, w in zip(columns, [80, 80, 80, 80, 180]):
+    tree.heading(col, text=col)
+    tree.column(col, width=w, anchor="center")
+tree.grid(row=8, column=0, columnspan=2, pady=10)
 
-# root.mainloop()
+root.mainloop()

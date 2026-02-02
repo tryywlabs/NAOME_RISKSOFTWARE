@@ -117,9 +117,7 @@ def create_group_ui(root):
             group_manager.current_group_number = 1
             
             # Delete cache file
-            import os
-            # Relative cache routing
-            cache_file = os.path.join(os.path.dirname(__file__), '../../../middleware/data-input/frequency/group_cache.csv')
+            cache_file = group_manager.cache_file_path
             if os.path.exists(cache_file):
                 os.remove(cache_file)
             
@@ -495,6 +493,7 @@ def create_group_ui(root):
     add_button_frame = ttk.Frame(add_group_frame)
     add_button_frame.pack(pady=20, fill="both", expand=True)
     ttk.Button(add_button_frame, text="New Group", bootstyle=INFO, width=15, command=create_new_group).pack(pady=10)
+    ttk.Button(add_button_frame, text="Save Groups", bootstyle=PRIMARY, width=15, command=save_groups).pack(pady=10)
     
     finish_label = ttk.Label(add_group_frame, text="Finish", font=bold_font)
     finish_label.pack(pady=(20, 5))

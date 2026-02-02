@@ -112,10 +112,10 @@ def create_frequency_analysis_ui(root):
         
         # Define leak size categories and their midpoints for plotting
         leak_categories = {
-            '1-3mm': 2.0,
-            '3-10mm': 6.5,
-            '10-50mm': 30.0,
-            '50-150mm': 100.0,
+            '1-3mm': 3.0,
+            '3-10mm': 10.0,
+            '10-50mm': 50.0,
+            '50-150mm': 150.0,
             '>150mm': 175.0
         }
         
