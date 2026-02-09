@@ -48,6 +48,7 @@ def create_consequence_input_ui(root):
     z_var = StringVar(value=str(getattr(defaults, 'z_m', 0.0)))
     puff_time_var = StringVar(value=str(getattr(defaults, 'puff_time_s', 30.0)))
     duration_var = StringVar(value=str(getattr(defaults, 'release_duration_s', 60.0)))
+    critical_conc_var = StringVar(value=str(getattr(defaults, 'critical_concentration_kg_m3', 0.0)))
 
     def add_label_entry(row, col, text, var):
         ttk.Label(frame, text=text).grid(row=row, column=col, sticky="w", padx=5, pady=4)
@@ -76,6 +77,7 @@ def create_consequence_input_ui(root):
 
     add_label_entry(7, 0, "Puff time (s)", puff_time_var)
     add_label_entry(7, 1, "Release duration (s)", duration_var)
+    add_label_entry(7, 2, "Critical conc. (kg/m3)", critical_conc_var)
 
     def save_params():
         if update_params is None:
@@ -95,6 +97,7 @@ def create_consequence_input_ui(root):
                 z_m=float(z_var.get()),
                 puff_time_s=float(puff_time_var.get()),
                 release_duration_s=float(duration_var.get()),
+                critical_concentration_kg_m3=float(critical_conc_var.get()),
             )
             messagebox.showinfo("Saved", "Consequence inputs saved.")
         except ValueError:

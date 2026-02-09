@@ -50,9 +50,10 @@ except Exception:
     calculate_group_consequence = None
 
 try:
-    from plum_2Dgraph_ import plot_plume_3d
+    from plum_2Dgraph_ import plot_plume_3d, plot_plume_2d_profile
 except Exception:
     plot_plume_3d = None
+    plot_plume_2d_profile = None
 
 
 
@@ -237,9 +238,11 @@ def create_consequence_analysis_ui(root):
         if x_max <= 0:
             x_max = 50.0
         z_max = max(50.0, float(params.release_height_m) * 2.0)
-        c_limit = _parse_float(row[7], 1.0)
+        c_limit = _parse_float(getattr(params, "critical_concentration_kg_m3", 0.0), 0.0)
         if c_limit <= 0:
-            c_limit = 1.0
+            c_limit = _parse_float(row[7], 1.0)
+            if c_limit <= 0:
+                c_limit = 1.0
 
         y_max = max(20.0, x_max / 4.0)
         plot_plume_3d(
@@ -255,6 +258,41 @@ def create_consequence_analysis_ui(root):
             c_limit,
         )
 
+    def open_plume_profile():
+        if plot_plume_2d_profile is None:
+            messagebox.showerror("Error", "Plume plotting module not available.")
+            return
+        selection = tree.selection()
+        if not selection:
+            messagebox.showerror("Selection Required", "Select a row to plot dispersion.")
+            return
+        params = load_params_summary()
+        if params is None:
+            messagebox.showerror("Error", "Consequence inputs are not available.")
+            return
+
+        row = tree.item(selection[0], "values")
+        leak_rate = _parse_float(row[5], 0.0)
+        model_type = str(row[6] or params.model).lower()
+        if model_type != "plume":
+            messagebox.showerror("Unsupported Model", "Only plume plots are supported right now.")
+            return
+
+        x_max = float(params.x_m)
+        if x_max <= 0:
+            x_max = 50.0
+        c_limit = _parse_float(getattr(params, "critical_concentration_kg_m3", 0.0), 0.0)
+
+        plot_plume_2d_profile(
+            leak_rate,
+            float(params.wind_speed_m_s),
+            float(params.release_height_m),
+            str(params.stability_class).upper(),
+            0.0,
+            x_max,
+            c_limit,
+        )
+
     button_row = ttk.Frame(frame)
     button_row.pack(fill="x", pady=(8, 0))
 
@@ -265,6 +303,9 @@ def create_consequence_analysis_ui(root):
         side="left", padx=5
     )
     ttk.Button(button_row, text="Plot Dispersion (3D)", command=open_plume_plot).pack(
+        side="left", padx=5
+    )
+    ttk.Button(button_row, text="Plot Dispersion (2D)", command=open_plume_profile).pack(
         side="left", padx=5
     )
 

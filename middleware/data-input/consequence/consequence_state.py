@@ -16,6 +16,7 @@ class ConsequenceParams:
     z_m: float = 0.0
     puff_time_s: float = 30.0
     release_duration_s: float = 60.0
+    critical_concentration_kg_m3: float = 0.0
 
 
 _PARAMS = ConsequenceParams()
