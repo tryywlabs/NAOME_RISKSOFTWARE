@@ -1,66 +1,34 @@
-import tkinter as tk
-from tkinter import ttk
-from math import pow, pi, exp
+"""Pool fire radiant heat flux calculation utilities."""
+from __future__ import annotations
 
-def calculate_radiant_heat_flux():
-    try:
-        # Get user inputs
-        Q = float(heat_release_rate_entry.get())  # Total heat release rate (kW)
-        D = float(pool_diameter_entry.get())  # Pool diameter (m)
-        x = float(distance_entry.get())  # Distance from fire center to target (m)
-        f = float(fraction_radiative_entry.get())  # Radiative fraction (dimensionless)
-        tau = float(atmospheric_trans_entry.get())  # Atmospheric transmissivity (dimensionless)
+import math
 
-        # Perform calculations based on the formula
-        # q'' = \u03C4 \u00b7 f \u00b7 Q / (\u03C0 \u00b7 R^2)
-        R = (x**2 + (D/2)**2)**0.5  # Effective distance from fire center to target
-        q = (tau * f * Q) / (pi * pow(R, 2))  # Radiant heat flux (kW/m^2)
 
-        # Display the result
-        result_label.config(text=f"Radiant Heat Flux (q): {q:.2f} kW/m²")
-    except ValueError:
-        result_label.config(text="Invalid input. Please enter numeric values.")
+def calculate_radiant_heat_flux(
+    heat_release_rate_kw: float,
+    pool_diameter_m: float,
+    distance_m: float,
+    radiative_fraction: float,
+    atmospheric_transmissivity: float,
+) -> float:
+    """Return radiant heat flux q'' (kW/m^2) from a pool fire."""
+    q_kw = float(heat_release_rate_kw)
+    d_m = float(pool_diameter_m)
+    x_m = float(distance_m)
+    f = float(radiative_fraction)
+    tau = float(atmospheric_transmissivity)
 
-# Create the main application window
-root = tk.Tk()
-root.title("Radiant Heat Flux Calculator")
+    if q_kw <= 0:
+        raise ValueError("Heat release rate must be > 0.")
+    if d_m <= 0:
+        raise ValueError("Pool diameter must be > 0.")
+    if x_m < 0:
+        raise ValueError("Distance must be >= 0.")
+    if not 0 <= f <= 1:
+        raise ValueError("Radiative fraction must be between 0 and 1.")
+    if not 0 <= tau <= 1:
+        raise ValueError("Atmospheric transmissivity must be between 0 and 1.")
 
-# Input fields
-frame = ttk.Frame(root, padding="10")
-frame.grid(row=0, column=0, sticky=(tk.W, tk.E))
-
-# Heat release rate
-ttk.Label(frame, text="Heat Release Rate (Q) [kW]:").grid(row=0, column=0, sticky=tk.W)
-heat_release_rate_entry = ttk.Entry(frame, width=20)
-heat_release_rate_entry.grid(row=0, column=1)
-
-# Pool diameter
-ttk.Label(frame, text="Pool Diameter (D) [m]:").grid(row=1, column=0, sticky=tk.W)
-pool_diameter_entry = ttk.Entry(frame, width=20)
-pool_diameter_entry.grid(row=1, column=1)
-
-# Distance from fire center
-ttk.Label(frame, text="Distance to Target (x) [m]:").grid(row=2, column=0, sticky=tk.W)
-distance_entry = ttk.Entry(frame, width=20)
-distance_entry.grid(row=2, column=1)
-
-# Radiative fraction
-ttk.Label(frame, text="Radiative Fraction (f):").grid(row=3, column=0, sticky=tk.W)
-fraction_radiative_entry = ttk.Entry(frame, width=20)
-fraction_radiative_entry.grid(row=3, column=1)
-
-# Atmospheric transmissivity
-ttk.Label(frame, text="Atmospheric Transmissivity (\u03C4):").grid(row=4, column=0, sticky=tk.W)
-atmospheric_trans_entry = ttk.Entry(frame, width=20)
-atmospheric_trans_entry.grid(row=4, column=1)
-
-# Calculate button
-calculate_button = ttk.Button(frame, text="Calculate", command=calculate_radiant_heat_flux)
-calculate_button.grid(row=5, column=0, columnspan=2)
-
-# Result label
-result_label = ttk.Label(frame, text="", foreground="blue")
-result_label.grid(row=6, column=0, columnspan=2)
-
-# Start the Tkinter event loop
-root.mainloop()
+    # Effective distance from fire center to target.
+    r_m = math.sqrt((x_m**2) + ((d_m / 2.0) ** 2))
+    return (tau * f * q_kw) / (math.pi * (r_m**2))

@@ -117,7 +117,10 @@ def plot_plume_3d(
         Z = Z[: last_idx + 1, :, :]
         C = C[: last_idx + 1, :, :]
 
-    threshold = min(C_limit, np.percentile(positive, 90))
+    if C_limit > 0:
+        threshold = C_limit
+    else:
+        threshold = np.percentile(positive, 90)
     fig = plt.figure(figsize=(8.5, 6))
     ax = fig.add_subplot(111, projection="3d")
     cmap = plt.get_cmap("plasma")
@@ -214,32 +217,59 @@ def plot_plume_3d(
     plt.show()
 
 
+def plot_plume_2d_profile(
+    Qevp,
+    u_wind,
+    H_E,
+    stability_class,
+    x_min,
+    x_max,
+    C_limit=0.0,
+):
+    x = np.linspace(x_min, x_max, 200)
+    conc = np.zeros_like(x)
+    for i, x_val in enumerate(x):
+        conc[i] = gaussian_plume(Qevp, u_wind, H_E, x_val, 0.0, H_E, stability_class)
+
+    if C_limit and C_limit > 0:
+        conc = np.where(conc >= C_limit, conc, np.nan)
+
+    plt.figure(figsize=(7.5, 4.5))
+    plt.plot(x, conc, color="navy", linewidth=1.6)
+    plt.title("Gaussian Plume Concentration vs Distance")
+    plt.xlabel("Downwind Distance x (m)")
+    plt.ylabel("Concentration (kg/m³)")
+    plt.grid(True, alpha=0.3, linestyle="-", linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
 # -----------------------------
 # Tkinter GUI
 # -----------------------------
-def calculate_and_plot():
-    try:
-        Qevp = float(entry_Qevp.get())
-        u_wind = float(entry_u.get())
-        H_E = float(entry_H.get())
-        stability_class = combo_class.get().upper()
+# def calculate_and_plot():
+#     try:
+#         Qevp = float(entry_Qevp.get())
+#         u_wind = float(entry_u.get())
+#         H_E = float(entry_H.get())
+#         stability_class = combo_class.get().upper()
 
-        x_min = max(0.0, float(entry_xmin.get()))
-        x_max = float(entry_xmax.get())
-        z_min = max(0.0, float(entry_zmin.get()))
-        z_max = float(entry_zmax.get())
-        C_limit = float(entry_C_limit.get())
+#         x_min = max(0.0, float(entry_xmin.get()))
+#         x_max = float(entry_xmax.get())
+#         z_min = max(0.0, float(entry_zmin.get()))
+#         z_max = float(entry_zmax.get())
+#         C_limit = float(entry_C_limit.get())
 
-        y_max = max(10.0, x_max / 4.0)
+#         y_max = max(10.0, x_max / 4.0)
 
-        # 1️⃣ 그래프 표시
-        plot_plume_3d(Qevp, u_wind, H_E, stability_class, x_min, x_max, y_max, z_min, z_max, C_limit)
+#         # 1️⃣ 그래프 표시
+#         plot_plume_3d(Qevp, u_wind, H_E, stability_class, x_min, x_max, y_max, z_min, z_max, C_limit)
 
-        # 2️⃣ 중심선(y=0, z=H_E) 농도 테이블 업데이트
-        update_table(Qevp, u_wind, H_E, stability_class, x_min, x_max)
+#         # 2️⃣ 중심선(y=0, z=H_E) 농도 테이블 업데이트
+#         update_table(Qevp, u_wind, H_E, stability_class, x_min, x_max)
 
-    except Exception as e:
-        messagebox.showerror("Error", f"Invalid input: {e}")
+#     except Exception as e:
+#         messagebox.showerror("Error", f"Invalid input: {e}")
 
 
 def update_table(Qevp, u_wind, H_E, stability_class, x_min, x_max):
