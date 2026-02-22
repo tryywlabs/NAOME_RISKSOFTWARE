@@ -49,10 +49,25 @@ def create_consequence_input_ui(root):
     puff_time_var = StringVar(value=str(getattr(defaults, 'puff_time_s', 30.0)))
     duration_var = StringVar(value=str(getattr(defaults, 'release_duration_s', 60.0)))
     critical_conc_var = StringVar(value=str(getattr(defaults, 'critical_concentration_kg_m3', 0.0)))
+    explosion_eta_var = StringVar(value=str(getattr(defaults, 'explosion_eta', 0.01)))
+    explosion_mass_var = StringVar(value=str(getattr(defaults, 'explosion_mass_kg', 1.0)))
+    explosion_heat_combustion_var = StringVar(
+        value=str(getattr(defaults, 'explosion_heat_combustion_kj_kg', 0.0))
+    )
+    explosion_tnt_heat_var = StringVar(
+        value=str(getattr(defaults, 'explosion_tnt_heat_combustion_kj_kg', 4680.0))
+    )
+    explosion_distance_var = StringVar(value=str(getattr(defaults, 'explosion_distance_m', 10.0)))
+    explosion_p0_var = StringVar(value=str(getattr(defaults, 'explosion_ambient_pressure_bar', 1.013)))
+    pool_fire_q_var = StringVar(value=str(getattr(defaults, 'pool_fire_heat_release_rate_kw', 1000.0)))
+    pool_fire_diameter_var = StringVar(value=str(getattr(defaults, 'pool_fire_diameter_m', 5.0)))
+    pool_fire_distance_var = StringVar(value=str(getattr(defaults, 'pool_fire_distance_m', 20.0)))
+    pool_fire_fraction_var = StringVar(value=str(getattr(defaults, 'pool_fire_radiative_fraction', 0.35)))
+    pool_fire_tau_var = StringVar(value=str(getattr(defaults, 'pool_fire_atmospheric_transmissivity', 1.0)))
 
-    def add_label_entry(row, col, text, var):
-        ttk.Label(frame, text=text).grid(row=row, column=col, sticky="w", padx=5, pady=4)
-        entry = ttk.Entry(frame, textvariable=var, width=14)
+    def add_label_entry(row, col, text, var, parent=frame):
+        ttk.Label(parent, text=text).grid(row=row, column=col, sticky="w", padx=5, pady=4)
+        entry = ttk.Entry(parent, textvariable=var, width=14)
         entry.grid(row=row + 1, column=col, sticky="w", padx=5, pady=(0, 6))
         return entry
 
@@ -79,11 +94,32 @@ def create_consequence_input_ui(root):
     add_label_entry(7, 1, "Release duration (s)", duration_var)
     add_label_entry(7, 2, "Critical conc. (kg/m3)", critical_conc_var)
 
+    explosion_frame = ttk.LabelFrame(frame, text="Explosion Model Inputs (TNT / TNO / BST)", padding=8)
+    explosion_frame.grid(row=9, column=0, columnspan=4, sticky="ew", padx=5, pady=(10, 0))
+
+    add_label_entry(0, 0, "Eta (0.005 - 0.2)", explosion_eta_var, parent=explosion_frame)
+    add_label_entry(0, 1, "Mass (kg)", explosion_mass_var, parent=explosion_frame)
+    add_label_entry(0, 2, "Heat combustion (kJ/kg)", explosion_heat_combustion_var, parent=explosion_frame)
+    add_label_entry(0, 3, "TNT heat (kJ/kg)", explosion_tnt_heat_var, parent=explosion_frame)
+    add_label_entry(2, 0, "Distance (m)", explosion_distance_var, parent=explosion_frame)
+    add_label_entry(2, 1, "Ambient pressure p0 (bar)", explosion_p0_var, parent=explosion_frame)
+
+    pool_fire_frame = ttk.LabelFrame(frame, text="Pool Fire Model Inputs", padding=8)
+    pool_fire_frame.grid(row=10, column=0, columnspan=4, sticky="ew", padx=5, pady=(10, 0))
+    add_label_entry(0, 0, "Heat release rate Q (kW)", pool_fire_q_var, parent=pool_fire_frame)
+    add_label_entry(0, 1, "Pool diameter D (m)", pool_fire_diameter_var, parent=pool_fire_frame)
+    add_label_entry(0, 2, "Distance x (m)", pool_fire_distance_var, parent=pool_fire_frame)
+    add_label_entry(2, 0, "Radiative fraction f (0-1)", pool_fire_fraction_var, parent=pool_fire_frame)
+    add_label_entry(2, 1, "Transmissivity tau (0-1)", pool_fire_tau_var, parent=pool_fire_frame)
+
     def save_params():
         if update_params is None:
             messagebox.showerror("Error", "Consequence input state is unavailable.")
             return
         try:
+            eta_val = float(explosion_eta_var.get())
+            if not 0.005 <= eta_val <= 0.2:
+                raise ValueError("Eta must be between 0.005 and 0.2.")
             update_params(
                 gas_density_kg_m3=float(gas_density_var.get()),
                 liquid_density_kg_m3=float(liquid_density_var.get()),
@@ -98,12 +134,23 @@ def create_consequence_input_ui(root):
                 puff_time_s=float(puff_time_var.get()),
                 release_duration_s=float(duration_var.get()),
                 critical_concentration_kg_m3=float(critical_conc_var.get()),
+                explosion_eta=eta_val,
+                explosion_mass_kg=float(explosion_mass_var.get()),
+                explosion_heat_combustion_kj_kg=float(explosion_heat_combustion_var.get()),
+                explosion_tnt_heat_combustion_kj_kg=float(explosion_tnt_heat_var.get()),
+                explosion_distance_m=float(explosion_distance_var.get()),
+                explosion_ambient_pressure_bar=float(explosion_p0_var.get()),
+                pool_fire_heat_release_rate_kw=float(pool_fire_q_var.get()),
+                pool_fire_diameter_m=float(pool_fire_diameter_var.get()),
+                pool_fire_distance_m=float(pool_fire_distance_var.get()),
+                pool_fire_radiative_fraction=float(pool_fire_fraction_var.get()),
+                pool_fire_atmospheric_transmissivity=float(pool_fire_tau_var.get()),
             )
             messagebox.showinfo("Saved", "Consequence inputs saved.")
-        except ValueError:
-            messagebox.showerror("Error", "Please enter valid numeric values.")
+        except ValueError as exc:
+            messagebox.showerror("Error", str(exc) or "Please enter valid numeric values.")
 
     save_button = tb.Button(frame, text="Save Inputs", bootstyle=SUCCESS, command=save_params)
-    save_button.grid(row=9, column=0, sticky="w", padx=5, pady=10)
+    save_button.grid(row=11, column=0, sticky="w", padx=5, pady=10)
 
     return frame

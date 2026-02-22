@@ -17,6 +17,17 @@ class ConsequenceParams:
     puff_time_s: float = 30.0
     release_duration_s: float = 60.0
     critical_concentration_kg_m3: float = 0.0
+    explosion_eta: float = 0.01
+    explosion_mass_kg: float = 1.0
+    explosion_heat_combustion_kj_kg: float = 0.0
+    explosion_tnt_heat_combustion_kj_kg: float = 4680.0
+    explosion_distance_m: float = 10.0
+    explosion_ambient_pressure_bar: float = 1.013
+    pool_fire_heat_release_rate_kw: float = 1000.0
+    pool_fire_diameter_m: float = 5.0
+    pool_fire_distance_m: float = 20.0
+    pool_fire_radiative_fraction: float = 0.35
+    pool_fire_atmospheric_transmissivity: float = 1.0
 
 
 _PARAMS = ConsequenceParams()
